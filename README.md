@@ -43,7 +43,7 @@ List database backups available for project.
 
 Download chosen or latest database and import into Magento instance.
 
-`bin/magedbm get [-d|--drop-tables] [-r|--region="..."] [-b|--bucket="..."] name file`
+`bin/magedbm get [--file="..."] [-d|--drop-tables] [-r|--region="..."] [-b|--bucket="..."] name`
 
 ### Delete Database Backups
 

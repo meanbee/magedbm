@@ -32,10 +32,11 @@ class GetCommand extends BaseCommand
                 InputArgument::REQUIRED,
                 'Project identifier'
             )
-            ->addArgument(
+            ->addOption(
                 'file',
-                InputArgument::REQUIRED,
-                'Filename'
+                null,
+                InputOption::VALUE_REQUIRED,
+                'File to import, otherwise latest downloaded'
             )
             ->addOption(
                 '--drop-tables',
@@ -68,40 +69,60 @@ class GetCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (!file_exists($this->getFilePath($input))) {
-            // Download database from s3 if doesn't exist in tmp directory
 
-            $iniReader = new IniReader();
-            $config = $iniReader->readFile($this->getAwsConfigPath());
-            $region = $input->getOption('region') ? $input->getOption('region') : $config['default']['region'];
+        $iniReader = new IniReader();
+        $config = $iniReader->readFile($this->getAwsConfigPath());
+        $region = $input->getOption('region') ? $input->getOption('region') : $config['default']['region'];
 
-            $magedbmConfig = $iniReader->readFile($this->getAppConfigPath());
-            $bucket = $input->getOption('bucket') ? $input->getOption('bucket') : $magedbmConfig['default']['bucket'];
+        $magedbmConfig = $iniReader->readFile($this->getAppConfigPath());
+        $bucket = $input->getOption('bucket') ? $input->getOption('bucket') : $magedbmConfig['default']['bucket'];
 
-            try {
-                // Upload to S3.
-                $s3 = new S3Client([
-                    'version'     => 'latest',
-                    'region'      => $region,
-                    'credentials' => CredentialProvider::defaultProvider(),
-                ]);
+        try {
+            // Upload to S3.
+            $s3 = new S3Client([
+                'version'     => 'latest',
+                'region'      => $region,
+                'credentials' => CredentialProvider::defaultProvider(),
+            ]);
 
-                $this->getOutput()->writeln('<info>Downloading Database</info>');
+            $file = $input->getOption('file');
+            if (!$file) {
+                $results = $s3->getIterator(
+                    'ListObjects',
+                    array('Bucket' => $bucket, 'Prefix' => $input->getArgument('name'))
+                );
 
-                /** @var \Aws\Result $result */
-                $result = $s3->getObject(array(
-                    'Bucket' => $bucket,
-                    'Key'    => $input->getArgument('name') . '/' . $input->getArgument('file'),
-                    'SaveAs' => $this->getFilePath($input)
-                ));
+                if (!$results) {
+                    $this->getOutput()->writeln(sprintf('<error>No backups found for %s</error>', $input->getArgument('name')));
+                }
 
-            } catch (CredentialsException $e) {
-                $this->getOutput()->writeln('<error>AWS credentials failed</error>');
-                exit;
-            } catch (AwsException $e) {
-                $this->getOutput()->writeln(sprintf('<error>Failed to download from S3. Error code %s.</error>', $e->getAwsErrorCode()));
-                exit;
+                $newest = null;
+                foreach ($results as $item) {
+                    if (is_null($newest) || $item['LastModified'] > $newest['LastModified']) {
+                        $newest = $item;
+                    }
+                }
+
+                $itemKeyChunks = explode('/', $item['Key']);
+                $file = array_pop($itemKeyChunks);
             }
+
+            $this->getOutput()->writeln(sprintf('<info>Downloading Database %s</info>', $file));
+
+            /** @var \Aws\Result $result */
+            $result = $s3->getObject(array(
+                'Bucket' => $bucket,
+                'Key'    => $input->getArgument('name') . '/' . $file,
+                'SaveAs' => $this->getFilePath($file)
+            ));
+
+
+        } catch (CredentialsException $e) {
+            $this->getOutput()->writeln('<error>AWS credentials failed</error>');
+            exit;
+        } catch (AwsException $e) {
+            $this->getOutput()->writeln(sprintf('<error>Failed to download from S3. Error code %s.</error>', $e->getAwsErrorCode()));
+            exit;
         }
 
 
@@ -113,7 +134,7 @@ class GetCommand extends BaseCommand
         }
 
         $params = array(
-            'filename'         => $this->getFilePath($input),
+            'filename'         => $this->getFilePath($file),
             '--compression'    => 'gzip',
         );
 
@@ -129,16 +150,14 @@ class GetCommand extends BaseCommand
     }
 
 
-    protected function getFilePath($input)
+    protected function getFilePath($file)
     {
         // Create tmp directory if doesn't exist
         if (!file_exists(self::TMP_PATH) && !is_dir(self::TMP_PATH)) {
             mkdir(self::TMP_PATH, 0700);
         }
 
-        $filename = $input->getArgument('file');
-
-        return sprintf('%s/%s', self::TMP_PATH, $filename);
+        return sprintf('%s/%s', self::TMP_PATH, $file);
     }
 
     /**
