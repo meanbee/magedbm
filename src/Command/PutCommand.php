@@ -42,7 +42,7 @@ class PutCommand extends BaseCommand
                 '--bucket',
                 '-b',
                 InputOption::VALUE_REQUIRED,
-                'Optionally specificy bucket, otherwise default configuration will be used. '
+                'Optionally specify bucket, otherwise default configuration will be used. '
             );
     }
 
