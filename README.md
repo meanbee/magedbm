@@ -18,10 +18,22 @@ within local environment.  This is a pain for numerous reason:
 
 ## Usage
 
+### Configure
 
-`bin/magedbm configure`
+`bin/magedbm configure [-f|--force] key secret region bucket`
 
+### Upload Database
 
+`bin/magedbm put [-r|--region="..."] [-b|--bucket="..."] name`
 
+### List Available Databases
 
-`bin/magedbm put project-name`
+`bin/magedbm ls [-r|--region="..."] [-b|--bucket="..."] name`
+
+### Download & Import Database
+
+`bin/magedbm get [-d|--drop-tables] [-r|--region="..."] [-b|--bucket="..."] name file`
+
+### Detele Database Backups
+
+`bin/magedbm rm [-r|--region="..."] [-b|--bucket="..."] name file`
