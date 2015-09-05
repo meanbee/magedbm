@@ -2,6 +2,8 @@
 namespace Meanbee\Magedbm;
 
 use Meanbee\Magedbm\Command\ConfigureCommand;
+use Meanbee\Magedbm\Command\DeleteCommand;
+use Meanbee\Magedbm\Command\ListCommand;
 use Meanbee\Magedbm\Command\PutCommand;
 
 class Application extends \Symfony\Component\Console\Application {
@@ -19,6 +21,8 @@ class Application extends \Symfony\Component\Console\Application {
         }
 
         $this->add(new ConfigureCommand());
+        $this->add(new DeleteCommand());
+        $this->add(new ListCommand());
         $this->add(new PutCommand());
     }
 
