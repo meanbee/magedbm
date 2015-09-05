@@ -95,11 +95,11 @@ class PutCommand extends BaseCommand
 
         try {
             /** @var \Aws\Result $result */
-            $result = $s3->putObject(array(
-                'Bucket'     => $bucket,
-                'Key'        => $input->getArgument('name') . '/' . $this->getFileName($input),
-                'SourceFile' => $this->getFilePath($input),
-            ));
+            $result = $s3->upload(
+                $bucket,
+                $input->getArgument('name') . '/' . $this->getFileName($input),
+                $this->getFilePath($input)
+            );
 
             $this->getOutput()->writeln(sprintf('<info>%s database uploaded to %s</info>',
                 $input->getArgument('name'), $result->get('ObjectURL')));
