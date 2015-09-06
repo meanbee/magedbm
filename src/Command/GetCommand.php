@@ -69,31 +69,21 @@ class GetCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
-        $iniReader = new IniReader();
-        $config = $iniReader->readFile($this->getAwsConfigPath());
-        $region = $input->getOption('region') ? $input->getOption('region') : $config['default']['region'];
-
-        $magedbmConfig = $iniReader->readFile($this->getAppConfigPath());
-        $bucket = $input->getOption('bucket') ? $input->getOption('bucket') : $magedbmConfig['default']['bucket'];
+        $s3 = $this->getS3Client($input->getOption('region'));
+        $config = $this->getConfig($input);
 
         try {
-            // Upload to S3.
-            $s3 = new S3Client([
-                'version'     => 'latest',
-                'region'      => $region,
-                'credentials' => CredentialProvider::defaultProvider(),
-            ]);
-
             $file = $input->getOption('file');
             if (!$file) {
-                $results = $s3->getIterator(
-                    'ListObjects',
-                    array('Bucket' => $bucket, 'Prefix' => $input->getArgument('name'))
+
+                // Download latest available backup
+                $results = $s3->getIterator('ListObjects',
+                    array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
                 );
 
                 if (!$results) {
-                    $this->getOutput()->writeln(sprintf('<error>No backups found for %s</error>', $input->getArgument('name')));
+                    $this->getOutput()->writeln(sprintf('<error>No backups found for %s</error>',
+                        $input->getArgument('name')));
                 }
 
                 $newest = null;
@@ -103,28 +93,23 @@ class GetCommand extends BaseCommand
                     }
                 }
 
-                $itemKeyChunks = explode('/', $item['Key']);
+                $itemKeyChunks = explode('/', $newest['Key']);
                 $file = array_pop($itemKeyChunks);
             }
 
-            $this->getOutput()->writeln(sprintf('<info>Downloading Database %s</info>', $file));
+            $this->getOutput()->writeln(sprintf('<info>Downloading database %s</info>', $file));
 
-            /** @var \Aws\Result $result */
-            $result = $s3->getObject(array(
-                'Bucket' => $bucket,
+            $s3->getObject(array(
+                'Bucket' => $config['bucket'],
                 'Key'    => $input->getArgument('name') . '/' . $file,
                 'SaveAs' => $this->getFilePath($file)
             ));
 
-
-        } catch (CredentialsException $e) {
-            $this->getOutput()->writeln('<error>AWS credentials failed</error>');
-            exit;
         } catch (AwsException $e) {
-            $this->getOutput()->writeln(sprintf('<error>Failed to download from S3. Error code %s.</error>', $e->getAwsErrorCode()));
+            $this->getOutput()->writeln(sprintf('<error>Failed to download from S3. Error code %s.</error>',
+                $e->getAwsErrorCode()));
             exit;
         }
-
 
         try {
             /** @var \N98\Magento\Command\Database\ImportCommand $dump */

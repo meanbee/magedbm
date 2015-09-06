@@ -3,7 +3,10 @@ namespace Meanbee\Magedbm\Command;
 
 use Aws\Credentials\CredentialProvider;
 use Aws\Exception\CredentialsException;
+use Aws\S3\S3Client;
 use N98\Magento\Application as MagerunApplication;
+use Piwik\Ini\IniReader;
+use Piwik\Ini\IniReadingException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,6 +27,11 @@ class BaseCommand extends Command {
 
     /** @var \N98\Magento\Application $magerun */
     protected $magerun;
+
+    /** @var \Aws\S3\S3Client $s3Client */
+    protected $s3Client;
+
+    protected $config;
 
     /**
      * Set the input interface for this command.
@@ -74,13 +82,77 @@ class BaseCommand extends Command {
      *
      * @return \N98\Magento\Application
      */
-    public function getMagerun() {
+    public function getMagerun()
+    {
         if (!$this->magerun) {
             $this->magerun = new MagerunApplication($this->getApplication()->getAutoloader());
             $this->magerun->init();
         }
 
         return $this->magerun;
+    }
+
+    /**
+     * Provide authenticated S3 client if available.
+     *
+     * @param null $region
+     *
+     * @return \Aws\S3\S3Client
+     */
+    public function getS3Client($region = null)
+    {
+        if (!$this->s3Client) {
+            if (!$region) {
+                $iniReader = new IniReader();
+
+                try {
+                    $config = $iniReader->readFile($this->getAwsConfigPath());
+                    $region = $config['default']['region'];
+                } catch (IniReadingException $e) {
+                    $this->getOutput()->writeln('<error>Unable to read config. Try running `configure` again.</error>');
+                }
+            }
+
+            try {
+                // Upload to S3.
+                $this->s3Client = new S3Client([
+                    'version' => 'latest',
+                    'region'  => $region,
+                    'credentials' => CredentialProvider::defaultProvider(),
+                ]);
+            } catch (CredentialsException $e) {
+                $this->getOutput()->writeln('<error>AWS credentials failed</error>');
+            }
+        }
+
+        return $this->s3Client;
+    }
+
+    /**
+     * Merge provided config with config from file
+     *
+     * @throws IniReadingException
+     */
+    public function getConfig(InputInterface $input)
+    {
+        if (!$this->config) {
+            $iniReader = new IniReader();
+            try {
+                $config = $iniReader->readFile($this->getAppConfigPath());
+                $this->config = $config['default'];
+
+                foreach($input->getOptions() as $option => $value) {
+                    if ($value) {
+                        $this->config[$option] = $value;
+                    }
+                }
+
+            } catch (IniReadingException $e) {
+                $this->getOutput()->writeln('<error>Unable to read config. Try running `configure` again.</error>');
+            }
+        }
+
+        return $this->config;
     }
 
     /**
@@ -109,7 +181,7 @@ class BaseCommand extends Command {
             $provider = CredentialProvider::defaultProvider();
             $creds = $provider()->wait();
         } catch (CredentialsException $e) {
-            $this->getOutput()->writeln('<error>No AWS credentials found.  Please run configure first.</error>');
+            $this->getOutput()->writeln('<error>No AWS credentials found.  Please run `configure` first.</error>');
             exit;
         }
     }

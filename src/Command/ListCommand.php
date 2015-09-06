@@ -55,28 +55,13 @@ class ListCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $iniReader = new IniReader();
-        $config = $iniReader->readFile($this->getAwsConfigPath());
-        $region = $input->getOption('region') ? $input->getOption('region') : $config['default']['region'];
-
-        $magedbmConfig = $iniReader->readFile($this->getAppConfigPath());
-        $bucket = $input->getOption('bucket') ? $input->getOption('bucket') : $magedbmConfig['default']['bucket'];
-
-        try {
-            // Upload to S3.
-            $s3 = new S3Client([
-                'version' => 'latest',
-                'region'  => $region,
-                'credentials' => CredentialProvider::defaultProvider(),
-            ]);
-        } catch (CredentialsException $e) {
-            $this->getOutput()->writeln('<error>AWS credentials failed</error>');
-        }
+        $s3 = $this->getS3Client($input->getOption('region'));
+        $config = $this->getConfig($input);
 
         try {
             $results = $s3->getIterator(
                 'ListObjects',
-                array('Bucket' => $bucket, 'Prefix' => $input->getArgument('name'))
+                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
             );
 
             if ($results) {
@@ -88,7 +73,7 @@ class ListCommand extends BaseCommand
 
             foreach ($results as $item) {
                 $itemKeyChunks = explode('/', $item['Key']);
-                $this->getOutput()->writeln(array_pop($itemKeyChunks));
+                $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks) , $item['Size'] / 1024 / 1024));
             }
 
         } catch (AwsException $e) {

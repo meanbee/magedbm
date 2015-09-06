@@ -57,7 +57,6 @@ class PutCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         try {
             /** @var \N98\Magento\Command\Database\DumpCommand $dump */
             $dumpCommand = $this->getMagerun()->find("db:dump");
@@ -66,40 +65,25 @@ class PutCommand extends BaseCommand
         }
 
         $dumpInput = new ArrayInput(array(
-            'filename'         => $this->getFilePath($input),
-            '--strip'          => '@development',
-            '--compression'    => 'gzip',
+            'filename'       => $this->getFilePath($input),
+            '--strip'        => '@development',
+            '--compression'  => 'gzip',
         ));
 
         if ($returnCode = $dumpCommand->run($dumpInput, $output)) {
             throw new \Exception("magerun db:dump failed to create backup..");
         }
 
-        $iniReader = new IniReader();
-        $config = $iniReader->readFile($this->getAwsConfigPath());
-        $region = $input->getOption('region') ? $input->getOption('region') : $config['default']['region'];
-
-        $magedbmConfig = $iniReader->readFile($this->getAppConfigPath());
-        $bucket = $input->getOption('bucket') ? $input->getOption('bucket') : $magedbmConfig['default']['bucket'];
-
-        try {
-            // Upload to S3.
-            $s3 = new S3Client([
-                'version' => 'latest',
-                'region'  => $region,
-                'credentials' => CredentialProvider::defaultProvider(),
-            ]);
-        } catch (CredentialsException $e) {
-            $this->getOutput()->writeln('<error>AWS credentials failed</error>');
-        }
+        $s3 = $this->getS3Client($input->getOption('region'));
+        $config = $this->getConfig($input);
 
         try {
             /** @var \Aws\Result $result */
-            $result = $s3->upload(
-                $bucket,
-                $input->getArgument('name') . '/' . $this->getFileName($input),
-                $this->getFilePath($input)
-            );
+            $result = $s3->putObject(array(
+                'Bucket'     => $config['bucket'],
+                'Key'        => $input->getArgument('name') . '/' . $this->getFileName($input),
+                'SourceFile' => $this->getFilePath($input),
+            ));
 
             $this->getOutput()->writeln(sprintf('<info>%s database uploaded to %s</info>',
                 $input->getArgument('name'), $result->get('ObjectURL')));

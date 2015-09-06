@@ -60,29 +60,14 @@ class DeleteCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $iniReader = new IniReader();
-        $config = $iniReader->readFile($this->getAwsConfigPath());
-        $region = $input->getOption('region') ? $input->getOption('region') : $config['default']['region'];
-
-        $magedbmConfig = $iniReader->readFile($this->getAppConfigPath());
-        $bucket = $input->getOption('bucket') ? $input->getOption('bucket') : $magedbmConfig['default']['bucket'];
-
-        try {
-            // Upload to S3.
-            $s3 = new S3Client([
-                'version' => 'latest',
-                'region'  => $region,
-                'credentials' => CredentialProvider::defaultProvider(),
-            ]);
-        } catch (CredentialsException $e) {
-            $this->getOutput()->writeln('<error>AWS credentials failed</error>');
-        }
+        $s3 = $this->getS3Client($input->getOption('region'));
+        $config = $this->getConfig($input);
 
         try {
             $regex = sprintf('/^%s\/%s$/', $input->getArgument('name'), $input->getArgument('file'));
-            $s3->deleteMatchingObjects($bucket, $input->getArgument('name'), $regex);
+            $s3->deleteMatchingObjects($config['bucket'], $input->getArgument('name'), $regex);
 
-            $this->getOutput()->writeln('<info>Backup deleted.</info>');
+            $this->getOutput()->writeln(sprintf('<info>%s deleted.</info>', $input->getArgument('file')));
 
         } catch (AwsException $e) {
             $this->getOutput()->writeln(sprintf('<error>Failed to delete backup. Error code %s.</error>', $e->getAwsErrorCode()));
