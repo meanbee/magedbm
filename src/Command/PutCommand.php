@@ -98,7 +98,8 @@ class PutCommand extends BaseCommand
      * @param InputInterface  $input
      * @param OutputInterface $output
      */
-    protected function initialize(InputInterface $input, OutputInterface $output) {
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
         parent::initialize($input, $output);
 
         $this->cleanUp();
@@ -123,6 +124,12 @@ class PutCommand extends BaseCommand
         return $this->filename;
     }
 
+    /**
+     * Get file location in tmp dir
+     * @param $input
+     *
+     * @return string
+     */
     protected function getFilePath($input)
     {
         // Create tmp directory if doesn't exist

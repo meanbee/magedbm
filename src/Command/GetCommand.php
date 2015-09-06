@@ -75,26 +75,7 @@ class GetCommand extends BaseCommand
         try {
             $file = $input->getOption('file');
             if (!$file) {
-
-                // Download latest available backup
-                $results = $s3->getIterator('ListObjects',
-                    array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
-                );
-
-                if (!$results) {
-                    $this->getOutput()->writeln(sprintf('<error>No backups found for %s</error>',
-                        $input->getArgument('name')));
-                }
-
-                $newest = null;
-                foreach ($results as $item) {
-                    if (is_null($newest) || $item['LastModified'] > $newest['LastModified']) {
-                        $newest = $item;
-                    }
-                }
-
-                $itemKeyChunks = explode('/', $newest['Key']);
-                $file = array_pop($itemKeyChunks);
+                $file = $this->getLatestFile($s3, $config, $input);
             }
 
             $this->getOutput()->writeln(sprintf('<info>Downloading database %s</info>', $file));
@@ -134,7 +115,45 @@ class GetCommand extends BaseCommand
         $this->cleanUp();
     }
 
+    /**
+     * Get latest file for a project
+     *
+     * @param \Aws\S3\S3Client $s3
+     * @param Array $config
+     * @param InputInterface $input
+     *
+     * @return mixed
+     */
+    protected function getLatestFile($s3, $config, $input)
+    {
+        // Download latest available backup
+        $results = $s3->getIterator('ListObjects',
+            array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
+        );
 
+        if (!$results) {
+            $this->getOutput()->writeln(sprintf('<error>No backups found for %s</error>',
+                $input->getArgument('name')));
+        }
+
+        $newest = null;
+        foreach ($results as $item) {
+            if (is_null($newest) || $item['LastModified'] > $newest['LastModified']) {
+                $newest = $item;
+            }
+        }
+
+        $itemKeyChunks = explode('/', $newest['Key']);
+        return array_pop($itemKeyChunks);
+    }
+
+    /**
+     * Get filepath in tmp directory
+     *
+     * @param $file
+     *
+     * @return string
+     */
     protected function getFilePath($file)
     {
         // Create tmp directory if doesn't exist
