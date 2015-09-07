@@ -17,7 +17,7 @@
   },
   "require-dev": {},
   "autoload": {
-    "psr-4": {
+    "psr-0": {
       "Meanbee\\Magedbm\\": "src/"
     }
   }
