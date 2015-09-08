@@ -2,21 +2,35 @@
 
 Provides a simpler way for developers to retrieve sanitised Magento database backups without requiring server access.
 
-Run on production boxes to save database backups to Amazon S3.
-Run on local development machines to get latest backups
+It's design to run on production boxes to create database dumps and upload to Amazon S3 buckets. 
 
-## About
+It can then be run on local development machines to get latest or specific backup for a project and automatically import it. 
 
-Working on Magento client sites typically requires a fresh copy of the production database in order to minimise differences
-within local environment.  This is a pain for numerous reason:
 
-- Requires developer to have access to SSH
+## Motivation
 
-- Staging is regularly out of date as well 
+Working on Magento client sites typically requires a fresh copy of the production database in order reduce discrepencies later in the development cycle due to differences between environments.  This can be difficult to achieve a number of reasons and either way will slow down development process. 
 
 
 ## Installation
 
+Download the phar.
+
+```
+wget https://github.com/meanbee/magedbm/releases/download/v1.0.0/magedbm.phar
+```
+
+Make sure it's executable
+
+```
+chmod +x ./magedbm.phar
+```
+
+Copy to /usr/local/bin/ to make it available system-wide.
+
+```
+sudo cp ./magedbm.phar /usr/local/bin/
+```
 
 
 ## Usage
@@ -25,28 +39,38 @@ within local environment.  This is a pain for numerous reason:
 
 Configure with AWS credentials. 
 
-`bin/magedbm configure [-f|--force] key secret region bucket`
+```
+magedbm configure [-f|--force] key secret region bucket
+```
 
 ### Upload Database
 
 Dump database with customer and sales information stripped and upload to S3.
 
-`bin/magedbm put [-r|--region="..."] [-b|--bucket="..."] name`
+```
+magedbm put [-r|--region="..."] [-b|--bucket="..."] name
+```
 
 ### List Available Databases
 
 List database backups available for project.
 
-`bin/magedbm ls [-r|--region="..."] [-b|--bucket="..."] name`
+```
+magedbm ls [-r|--region="..."] [-b|--bucket="..."] name
+```
 
 ### Download & Import Database
 
 Download chosen or latest database and import into Magento instance.
 
-`bin/magedbm get [--file="..."] [-d|--drop-tables] [-r|--region="..."] [-b|--bucket="..."] name`
+```
+magedbm get [--file="..."] [-d|--drop-tables] [-r|--region="..."] [-b|--bucket="..."] name
+```
 
 ### Delete Database Backups
 
 Delete old backups from S3.
 
-`bin/magedbm rm [-r|--region="..."] [-b|--bucket="..."] name file`
+```
+magedbm rm [-r|--region="..."] [-b|--bucket="..."] name file
+```
