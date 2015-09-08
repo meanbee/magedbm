@@ -16,6 +16,9 @@
     "piwik/ini": "dev-master"
   },
   "require-dev": {},
+  "bin": [
+    "bin/magedbm"
+  ],
   "autoload": {
     "psr-0": {
       "Meanbee\\Magedbm\\": "src/"
