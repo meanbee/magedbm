@@ -1,17 +1,12 @@
 <?php
 namespace Meanbee\Magedbm\Command;
 
-use Aws\Exception\AwsException;
-use Aws\Exception\CredentialsException;
-use Aws\S3\Exception\S3Exception;
+use Aws\Common\Exception\InstanceProfileCredentialsException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Aws\Credentials\CredentialProvider;
-use Aws\S3\S3Client;
-use Piwik\Ini\IniReader;
 
 class PutCommand extends BaseCommand
 {
@@ -78,17 +73,19 @@ class PutCommand extends BaseCommand
         $config = $this->getConfig($input);
 
         try {
-            /** @var \Aws\Result $result */
             $result = $s3->putObject(array(
                 'Bucket'     => $config['bucket'],
                 'Key'        => $input->getArgument('name') . '/' . $this->getFileName($input),
                 'SourceFile' => $this->getFilePath($input),
             ));
 
-            $this->getOutput()->writeln(sprintf('<info>%s database uploaded to %s</info>',
+            $this->getOutput()->writeln(sprintf('<info>%s database uploaded to %s.</info>',
                 $input->getArgument('name'), $result->get('ObjectURL')));
-        } catch (AwsException $e) {
-            $this->getOutput()->writeln(sprintf('Failed to upload to S3. Error code %s.', $e->getAwsErrorCode()));
+
+        } catch (InstanceProfileCredentialsException $e) {
+            $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
+        } catch (\Exception $e) {
+            $this->getOutput()->writeln(sprintf('<error>Failed to upload to S3. %s.</error>', $e->getMessage()));
         } finally {
             $this->cleanUp();
         }

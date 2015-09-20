@@ -1,16 +1,11 @@
 <?php
 namespace Meanbee\Magedbm\Command;
 
-use Aws\Exception\AwsException;
-use Aws\Exception\CredentialsException;
+use Aws\Common\Exception\InstanceProfileCredentialsException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Aws\Credentials\CredentialProvider;
-use Aws\S3\S3Client;
-use Piwik\Ini\IniReader;
 
 class ListCommand extends BaseCommand
 {
@@ -64,20 +59,19 @@ class ListCommand extends BaseCommand
                 array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
             );
 
-            if ($results) {
-                $this->getOutput()->writeln('<info>Available backups:</info>');
-            } else {
-                $this->getOutput()->writeln(sprintf('<error>No backups found for %s</error>', $input->getArgument('name')));
-                exit;
-            }
-
             foreach ($results as $item) {
                 $itemKeyChunks = explode('/', $item['Key']);
                 $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks) , $item['Size'] / 1024 / 1024));
             }
 
-        } catch (AwsException $e) {
-            $this->getOutput()->writeln(sprintf('<error>Failed to list backups. Error code %s.</error>', $e->getAwsErrorCode()));
+            if (!$results->count()) {
+                // Credentials Exception would have been thrown by now, so now we can safely check for item count.
+                $this->getOutput()->writeln(sprintf('<error>No backups found for %s</error>', $input->getArgument('name')));
+            }
+        } catch (InstanceProfileCredentialsException $e) {
+            $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
+        } catch (\Exception $e) {
+            $this->getOutput()->writeln('<error>' . $e->getMessage() . '</error>');
         }
     }
 

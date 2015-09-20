@@ -1,17 +1,13 @@
 <?php
 namespace Meanbee\Magedbm\Command;
 
-use Aws\Exception\AwsException;
-use Aws\Exception\CredentialsException;
-use Aws\S3\Exception\S3Exception;
+use Aws\Common\Exception\InstanceProfileCredentialsException;
+use Aws\S3\Exception\NoSuchKeyException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Aws\Credentials\CredentialProvider;
-use Aws\S3\S3Client;
-use Piwik\Ini\IniReader;
 
 class GetCommand extends BaseCommand
 {
@@ -72,23 +68,26 @@ class GetCommand extends BaseCommand
         $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
+        $file = $input->getOption('file');
+        if (!$file) {
+            $file = $this->getLatestFile($s3, $config, $input);
+        }
+
+        $this->getOutput()->writeln(sprintf('<info>Downloading database %s</info>', $file));
+
         try {
-            $file = $input->getOption('file');
-            if (!$file) {
-                $file = $this->getLatestFile($s3, $config, $input);
-            }
-
-            $this->getOutput()->writeln(sprintf('<info>Downloading database %s</info>', $file));
-
             $s3->getObject(array(
                 'Bucket' => $config['bucket'],
                 'Key'    => $input->getArgument('name') . '/' . $file,
                 'SaveAs' => $this->getFilePath($file)
             ));
+        } catch (NoSuchKeyException $e) {
+            $this->getOutput()->writeln('<error>File such file found in S3 bucket.</error>');
+            exit;
+        }
 
-        } catch (AwsException $e) {
-            $this->getOutput()->writeln(sprintf('<error>Failed to download from S3. Error code %s.</error>',
-                $e->getAwsErrorCode()));
+        if (!file_exists($this->getFilePath($file))) {
+            $this->getOutput()->writeln('<error>Failed to save file to local tmp directory.</error>');
             exit;
         }
 
@@ -100,16 +99,20 @@ class GetCommand extends BaseCommand
         }
 
         $params = array(
-            'filename'         => $this->getFilePath($file),
-            '--compression'    => 'gzip',
+            'filename'       => $this->getFilePath($file),
+            '--compression'  => 'gzip',
         );
 
         if ($input->getOption('drop-tables')) {
             $params['--drop-tables'] = true;
         }
 
-        if ($returnCode = $importCommand->run(new ArrayInput($params), $output)) {
-            throw new \Exception("magerun db:import failed to import database.");
+        try {
+            if ($returnCode = $importCommand->run(new ArrayInput($params), $output)) {
+                $this->getOutput()->writeln('<error>magerun db:import failed to import database.</error>');
+            }
+        } catch (\Exception $e) {
+            $this->getOutput()->writeln($e->getMessage());
         }
 
         $this->cleanUp();
@@ -126,21 +129,30 @@ class GetCommand extends BaseCommand
      */
     protected function getLatestFile($s3, $config, $input)
     {
-        // Download latest available backup
-        $results = $s3->getIterator('ListObjects',
-            array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
-        );
+        try {
+            // Download latest available backup
+            $results = $s3->getIterator('ListObjects',
+                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
+            );
 
-        if (!$results) {
-            $this->getOutput()->writeln(sprintf('<error>No backups found for %s</error>',
-                $input->getArgument('name')));
-        }
-
-        $newest = null;
-        foreach ($results as $item) {
-            if (is_null($newest) || $item['LastModified'] > $newest['LastModified']) {
-                $newest = $item;
+            $newest = null;
+            foreach ($results as $item) {
+                if (is_null($newest) || $item['LastModified'] > $newest['LastModified']) {
+                    $newest = $item;
+                }
             }
+
+            if (!$results->count()) {
+                // Credentials Exception would have been thrown by now, so now we can safely check for item count.
+                throw new \Exception('No backups found for ' . $input->getArgument('name'));
+            }
+
+        } catch (InstanceProfileCredentialsException $e) {
+            $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
+            exit;
+        } catch (\Exception $e) {
+            $this->getOutput()->writeln('<error>' . $e->getMessage() . '</error>');
+            exit;
         }
 
         $itemKeyChunks = explode('/', $newest['Key']);

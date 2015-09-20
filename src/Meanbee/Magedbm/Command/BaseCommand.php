@@ -1,8 +1,6 @@
 <?php
 namespace Meanbee\Magedbm\Command;
 
-use Aws\Credentials\CredentialProvider;
-use Aws\Exception\CredentialsException;
 use Aws\S3\S3Client;
 use N98\Magento\Application as MagerunApplication;
 use Piwik\Ini\IniReader;
@@ -115,11 +113,9 @@ class BaseCommand extends Command {
 
             try {
                 // Upload to S3.
-                $this->s3Client = new S3Client([
-                    'version' => 'latest',
-                    'region'  => $region,
-                    'credentials' => CredentialProvider::defaultProvider(),
-                ]);
+                $this->s3Client = S3Client::factory(array(
+                    'region'  => $region
+                ));
             } catch (CredentialsException $e) {
                 $this->getOutput()->writeln('<error>AWS credentials failed</error>');
             }
@@ -168,24 +164,6 @@ class BaseCommand extends Command {
     }
 
 
-    /**
-     * Check for AWS Credentials
-     */
-    protected function validateConfiguration()
-    {
-        if ($this instanceof ConfigureCommand) {
-            return true;
-        }
-
-        try {
-            $provider = CredentialProvider::defaultProvider();
-            $creds = $provider()->wait();
-        } catch (CredentialsException $e) {
-            $this->getOutput()->writeln('<error>No AWS credentials found.  Please run `configure` first.</error>');
-            exit;
-        }
-    }
-
     protected function getAppDirPath()
     {
         return getenv('HOME') . self::APP_DIR_PATH;
@@ -220,5 +198,16 @@ class BaseCommand extends Command {
         return getenv('HOME') . self::AWS_CONFIG_PATH;
     }
 
+    /**
+     * Check for AWS Credentials
+     */
+    protected function validateConfiguration() {
+        if ($this instanceof ConfigureCommand) {
+            return true;
+        }
+
+        $configure = new ConfigureCommand();
+        return $configure->isConfigured();
+    }
 
 }
