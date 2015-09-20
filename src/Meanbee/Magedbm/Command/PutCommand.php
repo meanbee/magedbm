@@ -33,6 +33,12 @@ class PutCommand extends BaseCommand
                 'Project identifier'
             )
             ->addOption(
+                '--strip',
+                '-s',
+                InputOption::VALUE_OPTIONAL,
+                'Tables to exclude from export. Default is magerun\'s @development option.'
+            )
+            ->addOption(
                 '--region',
                 '-r',
                 InputOption::VALUE_REQUIRED,
@@ -64,9 +70,14 @@ class PutCommand extends BaseCommand
             throw new \Exception("'magerun db:dump' command not found. Missing dependencies?");
         }
 
+        $strip = '@development';
+        if ($input->hasOption('strip')) {
+            $strip = $input->getOption('strip') ?: '';
+        }
+
         $dumpInput = new ArrayInput(array(
             'filename'       => $this->getFilePath($input),
-            '--strip'        => '@development',
+            '--strip'        => $strip,
             '--compression'  => 'gzip',
         ));
 
