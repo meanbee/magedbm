@@ -17,7 +17,7 @@ Working on Magento client sites typically requires a fresh copy of the productio
 Download the phar.
 
 ```
-wget https://github.com/meanbee/magedbm/releases/download/v1.0.0/magedbm.phar
+wget https://github.com/meanbee/magedbm/releases/download/v1.1.0/magedbm.phar
 ```
 
 Make sure it's executable
