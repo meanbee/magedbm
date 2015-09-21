@@ -158,7 +158,7 @@ class PutCommand extends BaseCommand
                 '--compression'  => 'gzip',
             ));
 
-            if ($returnCode = $dumpCommand->run($dumpInput, $output)) {
+            if ($dumpCommand->run($dumpInput, $output)) {
                 throw new \Exception("magerun db:dump failed to create backup..");
             }
         } catch (\InvalidArgumentException $e) {
