@@ -31,6 +31,12 @@ class PutCommand extends BaseCommand
                 'Project identifier'
             )
             ->addOption(
+                '--strip',
+                '-s',
+                InputOption::VALUE_OPTIONAL,
+                'Tables to exclude from export. Default is magerun\'s @development option.'
+            )
+            ->addOption(
                 '--region',
                 '-r',
                 InputOption::VALUE_REQUIRED,
@@ -56,7 +62,7 @@ class PutCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->createBackup($input, $output);
-
+        
         $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
