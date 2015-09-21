@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "6c65a3be458da67112a3a1d3ace68036",
-    "content-hash": "cc7fff88bb000e40a6eb867253c02b3f",
+    "hash": "a7051760fb55849e8c490e074da11dc4",
+    "content-hash": "3d4d10094e7e7c3e89b30feecdcd9077",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -76,12 +76,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/composer.git",
-                "reference": "9e67bc761be98b45875855003eb8b2f23f4bf5a5"
+                "reference": "9f2e562e48145f10bf224f93f561e762df980638"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/composer/zipball/9e67bc761be98b45875855003eb8b2f23f4bf5a5",
-                "reference": "9e67bc761be98b45875855003eb8b2f23f4bf5a5",
+                "url": "https://api.github.com/repos/composer/composer/zipball/9f2e562e48145f10bf224f93f561e762df980638",
+                "reference": "9f2e562e48145f10bf224f93f561e762df980638",
                 "shasum": ""
             },
             "require": {
@@ -141,7 +141,7 @@
                 "dependency",
                 "package"
             ],
-            "time": "2015-09-18 14:32:06"
+            "time": "2015-09-20 18:44:55"
         },
         {
             "name": "composer/spdx-licenses",
@@ -378,6 +378,58 @@
                 "web service"
             ],
             "time": "2015-04-29 17:06:53"
+        },
+        {
+            "name": "ifsnop/mysqldump-php",
+            "version": "v2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ifsnop/mysqldump-php.git",
+                "reference": "2f850d6c3ea6d55ca2cb7b37bb568264264f728e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ifsnop/mysqldump-php/zipball/2f850d6c3ea6d55ca2cb7b37bb568264264f728e",
+                "reference": "2f850d6c3ea6d55ca2cb7b37bb568264264f728e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*",
+                "squizlabs/php_codesniffer": "1.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ifsnop\\": "src/Ifsnop/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Diego Torres",
+                    "homepage": "https://github.com/ifsnop",
+                    "role": "Developer"
+                }
+            ],
+            "description": "This is a php version of linux's mysqldump in terminal \"$ mysqldump -u username -p...\"",
+            "homepage": "https://github.com/ifsnop/mysqldump-php",
+            "keywords": [
+                "backup",
+                "database",
+                "dump",
+                "export",
+                "mysql",
+                "mysqldump",
+                "pdo",
+                "sqlite"
+            ],
+            "time": "2015-09-10 19:58:38"
         },
         {
             "name": "jakub-onderka/php-console-color",
@@ -1436,12 +1488,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "9fde02fe552256722466c9985520b6f50c9c759b"
+                "reference": "821464ad0137909bb38ad5dbf8a1f2230f33a9f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/9fde02fe552256722466c9985520b6f50c9c759b",
-                "reference": "9fde02fe552256722466c9985520b6f50c9c759b",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/821464ad0137909bb38ad5dbf8a1f2230f33a9f2",
+                "reference": "821464ad0137909bb38ad5dbf8a1f2230f33a9f2",
                 "shasum": ""
             },
             "require": {
@@ -1489,7 +1541,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2015-09-16 08:32:19"
+            "time": "2015-09-21 07:07:22"
         }
     ],
     "packages-dev": [],
