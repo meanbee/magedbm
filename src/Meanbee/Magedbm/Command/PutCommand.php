@@ -2,16 +2,15 @@
 namespace Meanbee\Magedbm\Command;
 
 use Aws\Exception\AwsException;
-use Aws\Exception\CredentialsException;
-use Aws\S3\Exception\S3Exception;
+use N98\Util\Console\Helper\DatabaseHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Aws\Credentials\CredentialProvider;
-use Aws\S3\S3Client;
-use Piwik\Ini\IniReader;
+use Ifsnop\Mysqldump\Mysqldump;
+
 
 class PutCommand extends BaseCommand
 {
@@ -57,22 +56,7 @@ class PutCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
-            /** @var \N98\Magento\Command\Database\DumpCommand $dump */
-            $dumpCommand = $this->getMagerun()->find("db:dump");
-        } catch (\InvalidArgumentException $e) {
-            throw new \Exception("'magerun db:dump' command not found. Missing dependencies?");
-        }
-
-        $dumpInput = new ArrayInput(array(
-            'filename'       => $this->getFilePath($input),
-            '--strip'        => '@development',
-            '--compression'  => 'gzip',
-        ));
-
-        if ($returnCode = $dumpCommand->run($dumpInput, $output)) {
-            throw new \Exception("magerun db:dump failed to create backup..");
-        }
+        $this->createBackup($input, $output);
 
         $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
@@ -148,5 +132,76 @@ class PutCommand extends BaseCommand
     protected function cleanUp()
     {
         array_map('unlink', glob(self::TMP_PATH . '/*'));
+    }
+
+    /**
+     * Create database backup in tmp directory.
+     * Use magerun db:dump if available. Otherwise use php alternative if exec not available.
+     *
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     *
+     * @throws \Exception
+     */
+    private function createBackup(InputInterface $input, OutputInterface $output)
+    {
+        $magerun = $this->getMagerun();
+        $filePath = $this->getFilePath($input);
+
+        try {
+            /** @var \N98\Magento\Command\Database\DumpCommand $dumpCommand */
+            $dumpCommand = $magerun->find("db:dump");
+
+            $dumpInput = new ArrayInput(array(
+                'filename'       => $filePath,
+                '--strip'        => '@development',
+                '--compression'  => 'gzip',
+            ));
+
+            if ($dumpCommand->run($dumpInput, $output)) {
+                throw new \Exception("magerun db:dump failed to create backup..");
+            }
+        } catch (\InvalidArgumentException $e) {
+
+            // Exec must be unavailable so use PHP alternative (match output)
+            $dbHelper = new DatabaseHelper();
+            $dbHelper->setHelperSet($magerun->getHelperSet());
+            $dbHelper->detectDbSettings(new NullOutput());
+            $stripTables = $dbHelper->resolveTables(explode(' ', '@development'),
+                $dbHelper->getTableDefinitions(
+                    $magerun->getConfig()['commands']['N98\Magento\Command\Database\DumpCommand'])
+            );
+
+            $output->writeln(array('',
+                $magerun->getHelperSet()->get('formatter')->formatBlock('Dump MySQL Database (without exec)',
+                    'bg=blue;fg=white', true), '',
+            ));
+
+            $dbSettings = $dbHelper->getDbSettings();
+            $username = (string) $dbSettings['username'];
+            $password = (string) $dbSettings['password'];
+            $dbName   = (string) $dbSettings['dbname'];
+
+            try {
+                $dump = new Mysqldump(sprintf('%s;dbname=%s', $dbHelper->dsn(), $dbName), $username, $password, array(
+                    'compress' => Mysqldump::GZIP,
+                    'exclude-tables' => $stripTables
+                ));
+
+                $output->writeln('<comment>No-data export for: <info>' . implode(' ', $stripTables)
+                    . '</info></comment>'
+                );
+
+                $output->writeln('<comment>Start dumping database <info>' . $dbSettings['dbname']
+                    . '</info> to file <info>' . $filePath . '</info>'
+                );
+
+                $dump->start($filePath);
+            } catch (\Exception $e) {
+                throw new \Exception("Unable to export database.");
+            }
+
+            $output->writeln('<info>Finished</info>');
+        }
     }
 }
