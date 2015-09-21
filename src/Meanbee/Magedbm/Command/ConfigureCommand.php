@@ -1,13 +1,11 @@
 <?php
 namespace Meanbee\Magedbm\Command;
 
+use Piwik\Ini\IniReader;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Aws\Credentials\CredentialProvider;
-use Aws\Exception\CredentialsException;
 use Piwik\Ini\IniWriter;
 
 class ConfigureCommand extends BaseCommand
@@ -114,15 +112,13 @@ class ConfigureCommand extends BaseCommand
      *
      * @return bool
      */
-    protected function isConfigured()
+    public function isConfigured()
     {
-        try {
-            $provider = CredentialProvider::defaultProvider();
-            $creds = $provider()->wait();
-        } catch (CredentialsException $e) {
-            return false;
+        if (file_exists($this->getAwsCredentialsPath()) && file_exists($this->getAwsConfigPath()) &&
+            file_exists($this->getAppConfigPath())) {
+                return true;
         }
 
-        return true;
+        return false;
     }
 }
