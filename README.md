@@ -48,7 +48,7 @@ magedbm configure [-f|--force] key secret region bucket
 Dump database with customer and sales information stripped and upload to S3.
 
 ```
-magedbm put [-r|--region="..."] [-b|--bucket="..."] name
+magedbm put [-s|--strip[="..."]] [-r|--region="..."] [-b|--bucket="..."] name
 ```
 
 ### List Available Databases
