@@ -1,16 +1,10 @@
 <?php
 namespace Meanbee\Magedbm\Command;
 
-use Aws\Exception\AwsException;
-use Aws\Exception\CredentialsException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Aws\Credentials\CredentialProvider;
-use Aws\S3\S3Client;
-use Piwik\Ini\IniReader;
 
 class DeleteCommand extends BaseCommand
 {
@@ -69,8 +63,8 @@ class DeleteCommand extends BaseCommand
 
             $this->getOutput()->writeln(sprintf('<info>%s deleted.</info>', $input->getArgument('file')));
 
-        } catch (AwsException $e) {
-            $this->getOutput()->writeln(sprintf('<error>Failed to delete backup. Error code %s.</error>', $e->getAwsErrorCode()));
+        } catch (\Exception $e) {
+            $this->getOutput()->writeln(sprintf('<error>Failed to delete backup. %s.</error>', $e->getMessage()));
         }
     }
 
