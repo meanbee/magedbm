@@ -73,8 +73,11 @@ class PutCommand extends BaseCommand
                 'SourceFile' => $this->getFilePath($input),
             ));
 
-            $this->getOutput()->writeln(sprintf('<info>%s database uploaded to %s.</info>',
-                $input->getArgument('name'), $result->get('ObjectURL')));
+            $this->getOutput()->writeln(sprintf(
+                '<info>%s database uploaded to %s.</info>',
+                $input->getArgument('name'),
+                $result->get('ObjectURL')
+            ));
 
         } catch (InstanceProfileCredentialsException $e) {
             $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
@@ -169,19 +172,23 @@ class PutCommand extends BaseCommand
                 throw new \Exception("magerun db:dump failed to create backup..");
             }
         } catch (\InvalidArgumentException $e) {
-
             // Exec must be unavailable so use PHP alternative (match output)
             $dbHelper = new DatabaseHelper();
             $dbHelper->setHelperSet($magerun->getHelperSet());
             $dbHelper->detectDbSettings(new NullOutput());
-            $stripTables = $dbHelper->resolveTables(explode(' ', '@development'),
+            $stripTables = $dbHelper->resolveTables(
+                explode(' ', '@development'),
                 $dbHelper->getTableDefinitions(
-                    $magerun->getConfig()['commands']['N98\Magento\Command\Database\DumpCommand'])
+                    $magerun->getConfig()['commands']['N98\Magento\Command\Database\DumpCommand']
+                )
             );
 
             $output->writeln(array('',
-                $magerun->getHelperSet()->get('formatter')->formatBlock('Dump MySQL Database (without exec)',
-                    'bg=blue;fg=white', true), '',
+                $magerun->getHelperSet()->get('formatter')->formatBlock(
+                    'Dump MySQL Database (without exec)',
+                    'bg=blue;fg=white',
+                    true
+                ), '',
             ));
 
             $dbSettings = $dbHelper->getDbSettings();
@@ -196,12 +203,10 @@ class PutCommand extends BaseCommand
                 ));
 
                 $output->writeln('<comment>No-data export for: <info>' . implode(' ', $stripTables)
-                    . '</info></comment>'
-                );
+                    . '</info></comment>');
 
                 $output->writeln('<comment>Start dumping database <info>' . $dbSettings['dbname']
-                    . '</info> to file <info>' . $filePath . '</info>'
-                );
+                    . '</info> to file <info>' . $filePath . '</info>');
 
                 $dump->start($filePath);
             } catch (\Exception $e) {

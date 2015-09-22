@@ -131,7 +131,8 @@ class GetCommand extends BaseCommand
     {
         try {
             // Download latest available backup
-            $results = $s3->getIterator('ListObjects',
+            $results = $s3->getIterator(
+                'ListObjects',
                 array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
             );
 

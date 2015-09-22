@@ -69,8 +69,12 @@ class ConfigureCommand extends BaseCommand
             mkdir($this->getAwsDirPath());
         }
 
-        if(!is_writeable($this->getAwsDirPath())) {
-            $this->getOutput()->writeln('<error>Unable to write AWS credentials.  Please manually add to ~/.aws/credentials');
+        if (!is_writeable($this->getAwsDirPath())) {
+            $this
+                ->getOutput()
+                ->writeln(
+                    '<error>Unable to write AWS credentials.  Please manually add to ~/.aws/credentials</error>'
+                );
             exit;
         }
 
@@ -79,7 +83,11 @@ class ConfigureCommand extends BaseCommand
         }
 
         if (!is_writeable($this->getAppDirPath())) {
-            $this->getOutput()->writeln('<error>Unable to write Magedbm config.  Please manually add to ~/.magedbm/config');
+            $this
+                ->getOutput()
+                ->writeln(
+                    '<error>Unable to write Magedbm config.  Please manually add to ~/.magedbm/config</error>'
+                );
             exit;
         }
 

@@ -61,18 +61,26 @@ class ListCommand extends BaseCommand
 
             foreach ($results as $item) {
                 $itemKeyChunks = explode('/', $item['Key']);
-                $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks) , $item['Size'] / 1024 / 1024));
+                $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks), $item['Size'] / 1024 / 1024));
             }
 
             if (!$results->count()) {
                 // Credentials Exception would have been thrown by now, so now we can safely check for item count.
-                $this->getOutput()->writeln(sprintf('<error>No backups found for %s</error>', $input->getArgument('name')));
+                $this
+                    ->getOutput()
+                    ->writeln(sprintf(
+                        '<error>No backups found for %s</error>',
+                        $input->getArgument('name')
+                    ));
             }
         } catch (InstanceProfileCredentialsException $e) {
-            $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
+            $this
+                ->getOutput()
+                ->writeln(
+                    '<error>AWS credentials not found. Please run `configure` command.</error>'
+                );
         } catch (\Exception $e) {
             $this->getOutput()->writeln('<error>' . $e->getMessage() . '</error>');
         }
     }
-
 }
