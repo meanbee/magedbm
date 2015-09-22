@@ -67,5 +67,4 @@ class DeleteCommand extends BaseCommand
             $this->getOutput()->writeln(sprintf('<error>Failed to delete backup. %s.</error>', $e->getMessage()));
         }
     }
-
 }
