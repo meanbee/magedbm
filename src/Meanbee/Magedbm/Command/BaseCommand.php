@@ -12,10 +12,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 class BaseCommand extends Command {
 
     const AWS_DIR_PATH          = '/.aws';
-    const AWS_CREDENTIALS_PATH  = self::AWS_DIR_PATH . '/credentials';
-    const AWS_CONFIG_PATH       = self::AWS_DIR_PATH . '/config';
+    const AWS_CREDENTIALS_PATH  = '/.aws/credentials';
+    const AWS_CONFIG_PATH       = '/.aws/config';
     const APP_DIR_PATH          = '/.magedbm';
-    const APP_CONFIG_PATH       = self::APP_DIR_PATH . '/config';
+    const APP_CONFIG_PATH       = '/.magedbm/config';
     const TMP_PATH              = '/tmp/magedbm';
 
     /** @var InputInterface $input */
