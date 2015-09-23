@@ -18,26 +18,30 @@ class ConfigureCommand extends BaseCommand
     {
         $this
             ->setName('configure')
-            ->setDescription('Configure with Amazon Credentials')
-            ->addArgument(
-                'key',
-                InputArgument::REQUIRED,
-                'AWS Key'
+            ->setDescription('Configure with Amazon Credentials.')
+            ->addOption(
+                '--key',
+                '-k',
+                InputOption::VALUE_REQUIRED,
+                'AWS Access Key ID'
             )
-            ->addArgument(
-                'secret',
-                InputArgument::REQUIRED,
-                'AWS Secret'
+            ->addOption(
+                '--secret',
+                '-s',
+                InputOption::VALUE_REQUIRED,
+                'AWS Secret Access Key'
             )
-            ->addArgument(
+            ->addOption(
                 'region',
-                InputArgument::REQUIRED,
-                'Default Region'
+                '-r',
+                InputOption::VALUE_REQUIRED,
+                'Default AWS Region'
             )
-            ->addArgument(
+            ->addOption(
                 'bucket',
-                InputArgument::REQUIRED,
-                'Default Bucket'
+                '-b',
+                InputOption::VALUE_REQUIRED,
+                'Default AWS S3 Bucket'
             )
             ->addOption(
                 '--force',
@@ -83,28 +87,45 @@ class ConfigureCommand extends BaseCommand
             exit;
         }
 
-        $credentials = array(
-            'default' => array(
-                'aws_access_key_id' => $input->getArgument('key'),
-                'aws_secret_access_key' => $input->getArgument('secret')
-            )
-        );
-        $config = array(
-            'default' => array(
-                'region' => $input->getArgument('region')
-            )
-        );
-        $magedbmconfig = array(
-            'default' => array(
-                'bucket' => $input->getArgument('bucket')
-            )
-        );
+        if ($input->getOption('key') && $input->getOption('secret')) {
+            $credentials = array(
+                'default' => array(
+                    'aws_access_key_id'     => $input->getOption('key'),
+                    'aws_secret_access_key' => $input->getOption('secret')
+                )
+            );
 
-        $writer->writeToFile($this->getAwsCredentialsPath(), $credentials);
-        $writer->writeToFile($this->getAwsConfigPath(), $config);
-        $writer->writeToFile($this->getAppConfigPath(), $magedbmconfig);
+            $writer->writeToFile($this->getAwsCredentialsPath(), $credentials);
+            $this->getOutput()->writeln('<info>Successfully configured AWS credentials.</info>');
+        } elseif (!file_exists($this->getAwsCredentialsPath())) {
+            $this->getOutput()->writeln('<error>No AWS credentials were found, nor provided.</error>');
+        }
 
-        $this->getOutput()->writeln('<info>Successfully configured.</info>');
+        if ($input->getOption('region')) {
+            $config = array(
+                'default' => array(
+                    'region' => $input->getOption('region')
+                )
+            );
+
+            $writer->writeToFile($this->getAwsConfigPath(), $config);
+            $this->getOutput()->writeln('<info>Successfully configured AWS region config.</info>');
+        } else if (!file_exists($this->getAwsConfigPath())) {
+            $this->getOutput()->writeln('<error>No AWS config was found, nor provided.</error>');
+        }
+
+        if ($input->getOption('bucket')) {
+            $magedbmconfig = array(
+                'default' => array(
+                    'bucket' => $input->getOption('bucket')
+                )
+            );
+
+            $writer->writeToFile($this->getAppConfigPath(), $magedbmconfig);
+            $this->getOutput()->writeln('<info>Successfully configured magedbm config.</info>');
+        } elseif (!file_exists($this->getAppConfigPath())) {
+            $this->getOutput()->writeln('<error>No MageDBM was found, nor provided.</error>');
+        }
     }
 
     /**
