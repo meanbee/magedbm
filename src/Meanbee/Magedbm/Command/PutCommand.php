@@ -13,6 +13,8 @@ use Ifsnop\Mysqldump\Mysqldump;
 
 class PutCommand extends BaseCommand
 {
+    const HISTORY_COUNT = 5;
+
     protected $filename;
 
     /**
@@ -35,6 +37,18 @@ class PutCommand extends BaseCommand
                 '-s',
                 InputOption::VALUE_OPTIONAL,
                 'Tables to exclude from export. Default is magerun\'s @development option.'
+            )
+            ->addOption(
+                '--no-clean',
+                null,
+                InputOption::VALUE_NONE,
+                'Do not remove old databases on S3.'
+            )
+            ->addOption(
+                '--history-count',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Database history count to keep on S3.'
             )
             ->addOption(
                 '--region',
@@ -62,7 +76,7 @@ class PutCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->createBackup($input, $output);
-        
+
         $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
@@ -82,6 +96,38 @@ class PutCommand extends BaseCommand
             $this->getOutput()->writeln(sprintf('<error>Failed to upload to S3. %s.</error>', $e->getMessage()));
         } finally {
             $this->cleanUp();
+        }
+
+        if (!$input->getOption('no-clean')) {
+            $this->maintainDatabaseHistory($input, $output, $s3, $config);
+        }
+    }
+
+    /**
+     * @param $input
+     * @param $output
+     * @param $s3
+     * @param $config
+     */
+    protected function maintainDatabaseHistory($input, $output, $s3, $config) {
+        try {
+            $results = $s3->getIterator(
+                'ListObjects',
+                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'), 'sort_results' => true)
+            );
+
+            $results = iterator_to_array($results, true);
+            $historyCount = $input->getOption('history-count') ?: self::HISTORY_COUNT;
+            $deleteCount = count($results) - $historyCount;
+
+            for ($i = 0; $i < $deleteCount; $i++) {
+                $s3->deleteMatchingObjects($config['bucket'], $results[$i]['Key']);
+            }
+
+        } catch (InstanceProfileCredentialsException $e) {
+            $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
+        } catch (\Exception $e) {
+            $this->getOutput()->writeln('<error>' . $e->getMessage() . '</error>');
         }
     }
 
