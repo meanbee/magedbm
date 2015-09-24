@@ -224,9 +224,9 @@ class PutCommand extends BaseCommand
             $dbHelper = new DatabaseHelper();
             $dbHelper->setHelperSet($magerun->getHelperSet());
             $dbHelper->detectDbSettings(new NullOutput());
+            $magerunConfig = $magerun->getConfig();
             $stripTables = $dbHelper->resolveTables(explode(' ', '@development'),
-                $dbHelper->getTableDefinitions(
-                    $magerun->getConfig()['commands']['N98\Magento\Command\Database\DumpCommand'])
+                $dbHelper->getTableDefinitions($magerunConfig['commands']['N98\Magento\Command\Database\DumpCommand'])
             );
 
             $output->writeln(array('',
