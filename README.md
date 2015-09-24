@@ -17,7 +17,7 @@ Working on Magento client sites typically requires a fresh copy of the productio
 Download the phar.
 
 ```
-wget https://github.com/meanbee/magedbm/releases/download/v1.1.0/magedbm.phar
+wget https://github.com/meanbee/magedbm/releases/download/v1.2.0/magedbm.phar
 ```
 
 Make sure it's executable
@@ -40,7 +40,7 @@ sudo cp ./magedbm.phar /usr/local/bin/
 Configure with AWS credentials. 
 
 ```
-magedbm configure [-f|--force] key secret region bucket
+ magedbm configure [-k|--key="..."] [-s|--secret="..."] [-r|--region="..."] [-b|--bucket="..."] [-f|--force]
 ```
 
 ### Upload Database
@@ -48,7 +48,7 @@ magedbm configure [-f|--force] key secret region bucket
 Dump database with customer and sales information stripped and upload to S3.
 
 ```
-magedbm put [-s|--strip[="..."]] [-r|--region="..."] [-b|--bucket="..."] name
+magedbm  put [-s|--strip[="..."]] [--no-clean] [--history-count="..."] [-r|--region="..."] [-b|--bucket="..."] name
 ```
 
 ### List Available Databases
