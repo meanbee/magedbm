@@ -91,12 +91,16 @@ class PutCommand extends BaseCommand
                 $input->getArgument('name'), $result->get('ObjectURL')));
 
         } catch (InstanceProfileCredentialsException $e) {
-            $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
-        } catch (\Exception $e) {
-            $this->getOutput()->writeln(sprintf('<error>Failed to upload to S3. %s.</error>', $e->getMessage()));
-        } finally {
             $this->cleanUp();
+            $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
+            exit;
+        } catch (\Exception $e) {
+            $this->cleanUp();
+            $this->getOutput()->writeln(sprintf('<error>Failed to upload to S3. %s.</error>', $e->getMessage()));
+            exit;
         }
+
+        $this->cleanUp();
 
         if (!$input->getOption('no-clean')) {
             $this->maintainDatabaseHistory($input, $output, $s3, $config);
