@@ -2,7 +2,7 @@
   "name": "meanbee/magedbm",
   "description": "Magento database backup and import tool",
   "license": "MIT",
-  "keywords": ["magento"],
+  "keywords": ["magento", "database", "magedbm"],
   "authors": [
     {
       "name": "Tom Robertshaw",
@@ -11,6 +11,7 @@
   ],
   "minimum-stability": "dev",
   "require": {
+    "php": ">=5.3.3",
     "n98/magerun": "1.*",
     "aws/aws-sdk-php": "2.*",
     "piwik/ini": "dev-master",
