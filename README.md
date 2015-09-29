@@ -32,6 +32,51 @@ Copy to /usr/local/bin/ to make it available system-wide.
 sudo cp ./magedbm.phar /usr/local/bin/
 ```
 
+## Setup
+
+Login credentials for Amazon S3 will need to be set up to provide and maintain access to buckets and files. 
+
+To give you an example of possible setup, the following is provided which avoids the need to have numerous buckets 
+which would then need to be specified on every command.
+
+Create a bucket, e.g. 'magedbm'.  All developers should have access to this bucket.
+ 
+For each production box that is creating backups a new S3 user will need to be created with the "IAM Management Console".  We create a policy
+ which enables them to list contents of the bucket but only download files that they have access to.  That means the only information leak
+ is the names of files (client names).  This is the policy that we use:
+ 
+```
+ {
+     "Version": "2012-10-17",
+     "Statement": [
+         {
+             "Effect": "Allow",
+             "Action": "s3:ListAllMyBuckets",
+             "Resource": "arn:aws:s3:::*"
+         },
+         {
+             "Sid": "Stmt1441615435000",
+             "Effect": "Allow",
+             "Action": [
+                 "s3:ListBucket"
+             ],
+             "Resource": [
+                 "arn:aws:s3:::magedbm"
+             ]
+         },
+         {
+             "Effect": "Allow",
+             "Action": [
+                 "s3:*"
+             ],
+             "Resource": [
+                 "arn:aws:s3:::magedbm/clientname*"
+             ]
+         }
+     ]
+ }
+```
+
 
 ## Usage
 
