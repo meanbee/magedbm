@@ -64,7 +64,7 @@ magedbm ls [-r|--region="..."] [-b|--bucket="..."] name
 Download chosen or latest database and import into Magento instance.
 
 ```
-magedbm get [--file="..."] [-d|--drop-tables] [-r|--region="..."] [-b|--bucket="..."] name
+magedbm get [--file="..."] [-f|--force] [-d|--drop-tables] [-r|--region="..."] [-b|--bucket="..."] name
 ```
 
 ### Delete Database Backups

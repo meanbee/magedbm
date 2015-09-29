@@ -35,6 +35,12 @@ class GetCommand extends BaseCommand
                 'File to import, otherwise latest downloaded'
             )
             ->addOption(
+                '--force',
+                '-f',
+                InputOption::VALUE_NONE,
+                'Force import without interaction'
+            )
+            ->addOption(
                 '--drop-tables',
                 '-d',
                 InputOption::VALUE_NONE,
@@ -65,6 +71,18 @@ class GetCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // Import overwrites databases so ask for confirmation.
+        $dialog = $this->getHelper('dialog');
+        if (!$input->getOption('force')) {
+            if (!$dialog->askConfirmation(
+                $output,
+                '<question>Are you sure you wish to overwrite local database [y/n]?</question>',
+                false
+            )) {
+                return;
+            }
+        }
+
         $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
@@ -73,49 +91,9 @@ class GetCommand extends BaseCommand
             $file = $this->getLatestFile($s3, $config, $input);
         }
 
-        $this->getOutput()->writeln(sprintf('<info>Downloading database %s</info>', $file));
+        $this->downloadBackup($file, $s3, $config, $input);
 
-        try {
-            $s3->getObject(array(
-                'Bucket' => $config['bucket'],
-                'Key'    => $input->getArgument('name') . '/' . $file,
-                'SaveAs' => $this->getFilePath($file)
-            ));
-        } catch (NoSuchKeyException $e) {
-            $this->getOutput()->writeln('<error>File such file found in S3 bucket.</error>');
-            exit;
-        }
-
-        if (!file_exists($this->getFilePath($file))) {
-            $this->getOutput()->writeln('<error>Failed to save file to local tmp directory.</error>');
-            exit;
-        }
-
-        try {
-            /** @var \N98\Magento\Command\Database\ImportCommand $dump */
-            $importCommand = $this->getMagerun()->find("db:import");
-        } catch (\InvalidArgumentException $e) {
-            throw new \Exception("'magerun db:import' command not found. Missing dependencies?");
-        }
-
-        $params = array(
-            'filename'       => $this->getFilePath($file),
-            '--compression'  => 'gzip',
-        );
-
-        if ($input->getOption('drop-tables')) {
-            $params['--drop-tables'] = true;
-        }
-
-        try {
-            if ($returnCode = $importCommand->run(new ArrayInput($params), $output)) {
-                $this->getOutput()->writeln('<error>magerun db:import failed to import database.</error>');
-            }
-        } catch (\Exception $e) {
-            $this->getOutput()->writeln($e->getMessage());
-        }
-
-        $this->cleanUp();
+        $this->backupImport($file, $input);
     }
 
     /**
@@ -158,6 +136,72 @@ class GetCommand extends BaseCommand
         $itemKeyChunks = explode('/', $newest['Key']);
         return array_pop($itemKeyChunks);
     }
+
+    /**
+     * Download from S3 to tmp directory
+     *
+     * @param $s3
+     * @param $config
+     * @param $input
+     */
+    protected function downloadBackup($file, $s3, $config, $input)
+    {
+        $this->getOutput()->writeln(sprintf('<info>Downloading database %s</info>', $file));
+
+        try {
+            $s3->getObject(array(
+                'Bucket' => $config['bucket'],
+                'Key'    => $input->getArgument('name') . '/' . $file,
+                'SaveAs' => $this->getFilePath($file)
+            ));
+        } catch (NoSuchKeyException $e) {
+            $this->getOutput()->writeln('<error>File such file found in S3 bucket.</error>');
+            exit;
+        }
+
+        if (!file_exists($this->getFilePath($file))) {
+            $this->getOutput()->writeln('<error>Failed to save file to local tmp directory.</error>');
+            exit;
+        }
+    }
+
+    /**
+     * Import backup from tmp directory to local database
+     *
+     * @param $file
+     * @param $input
+     *
+     * @throws \Exception
+     */
+    protected function backupImport($file, $input)
+    {
+        try {
+            /** @var \N98\Magento\Command\Database\ImportCommand $dump */
+            $importCommand = $this->getMagerun()->find("db:import");
+        } catch (\InvalidArgumentException $e) {
+            throw new \Exception("'magerun db:import' command not found. Missing dependencies?");
+        }
+
+        $params = array(
+            'filename'       => $this->getFilePath($file),
+            '--compression'  => 'gzip',
+        );
+
+        if ($input->getOption('drop-tables')) {
+            $params['--drop-tables'] = true;
+        }
+
+        try {
+            if ($returnCode = $importCommand->run(new ArrayInput($params), $this->getOutput())) {
+                $this->getOutput()->writeln('<error>magerun db:import failed to import database.</error>');
+            }
+        } catch (\Exception $e) {
+            $this->getOutput()->writeln($e->getMessage());
+        }
+
+        $this->cleanUp();
+    }
+
 
     /**
      * Get filepath in tmp directory
