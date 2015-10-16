@@ -113,7 +113,8 @@ class PutCommand extends BaseCommand
      * @param $s3
      * @param $config
      */
-    protected function maintainDatabaseHistory($input, $output, $s3, $config) {
+    protected function maintainDatabaseHistory($input, $output, $s3, $config)
+    {
         try {
             $results = $s3->getIterator(
                 'ListObjects',

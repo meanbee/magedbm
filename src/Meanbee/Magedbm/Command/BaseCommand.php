@@ -9,7 +9,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BaseCommand extends Command {
+class BaseCommand extends Command
+{
 
     const AWS_DIR_PATH          = '/.aws';
     const AWS_CREDENTIALS_PATH  = '/.aws/credentials';
@@ -38,7 +39,8 @@ class BaseCommand extends Command {
      *
      * @return $this
      */
-    public function setInput(InputInterface $input) {
+    public function setInput(InputInterface $input)
+    {
         $this->input = $input;
 
         return $this;
@@ -49,7 +51,8 @@ class BaseCommand extends Command {
      *
      * @return InputInterface
      */
-    public function getInput() {
+    public function getInput()
+    {
         return $this->input;
     }
 
@@ -60,7 +63,8 @@ class BaseCommand extends Command {
      *
      * @return $this
      */
-    public function setOutput(OutputInterface $output) {
+    public function setOutput(OutputInterface $output)
+    {
         $this->output = $output;
 
         return $this;
@@ -71,7 +75,8 @@ class BaseCommand extends Command {
      *
      * @return OutputInterface
      */
-    public function getOutput() {
+    public function getOutput()
+    {
         return $this->output;
     }
 
@@ -155,7 +160,8 @@ class BaseCommand extends Command {
      * @param InputInterface  $input
      * @param OutputInterface $output
      */
-    protected function initialize(InputInterface $input, OutputInterface $output) {
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
         parent::initialize($input, $output);
 
         $this->setInput($input);
@@ -163,12 +169,17 @@ class BaseCommand extends Command {
         $this->validateConfiguration();
     }
 
-
+    /**
+     * @return string
+     */
     protected function getAppDirPath()
     {
         return getenv('HOME') . self::APP_DIR_PATH;
     }
 
+    /**
+     * @return string
+     */
     protected function getAppConfigPath()
     {
         return getenv('HOME') . self::APP_CONFIG_PATH;
@@ -201,7 +212,8 @@ class BaseCommand extends Command {
     /**
      * Check for AWS Credentials
      */
-    protected function validateConfiguration() {
+    protected function validateConfiguration()
+    {
         if ($this instanceof ConfigureCommand) {
             return true;
         }
