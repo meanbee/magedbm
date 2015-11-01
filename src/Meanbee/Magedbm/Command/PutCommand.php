@@ -67,7 +67,7 @@ class PutCommand extends BaseCommand
     /**
      * Execute the command.
      *
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      *
      * @throws \Exception
@@ -82,8 +82,8 @@ class PutCommand extends BaseCommand
 
         try {
             $result = $s3->putObject(array(
-                'Bucket'     => $config['bucket'],
-                'Key'        => $input->getArgument('name') . '/' . $this->getFileName($input),
+                'Bucket' => $config['bucket'],
+                'Key' => $input->getArgument('name') . '/' . $this->getFileName($input),
                 'SourceFile' => $this->getFilePath($input),
             ));
 
@@ -113,7 +113,8 @@ class PutCommand extends BaseCommand
      * @param $s3
      * @param $config
      */
-    protected function maintainDatabaseHistory($input, $output, $s3, $config) {
+    protected function maintainDatabaseHistory($input, $output, $s3, $config)
+    {
         try {
             $results = $s3->getIterator(
                 'ListObjects',
@@ -136,7 +137,7 @@ class PutCommand extends BaseCommand
     }
 
     /**
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
@@ -195,7 +196,7 @@ class PutCommand extends BaseCommand
      * Create database backup in tmp directory.
      * Use magerun db:dump if available. Otherwise use php alternative if exec not available.
      *
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      *
      * @throws \Exception
@@ -210,9 +211,9 @@ class PutCommand extends BaseCommand
             $dumpCommand = $magerun->find("db:dump");
 
             $dumpInput = new ArrayInput(array(
-                'filename'       => $filePath,
-                '--strip'        => '@development',
-                '--compression'  => 'gzip',
+                'filename' => $filePath,
+                '--strip' => '@development',
+                '--compression' => 'gzip',
             ));
 
             if ($dumpCommand->run($dumpInput, $output)) {
@@ -235,9 +236,9 @@ class PutCommand extends BaseCommand
             ));
 
             $dbSettings = $dbHelper->getDbSettings();
-            $username = (string) $dbSettings['username'];
-            $password = (string) $dbSettings['password'];
-            $dbName   = (string) $dbSettings['dbname'];
+            $username = (string)$dbSettings['username'];
+            $password = (string)$dbSettings['password'];
+            $dbName = (string)$dbSettings['dbname'];
 
             try {
                 $dump = new Mysqldump(sprintf('%s;dbname=%s', $dbHelper->dsn(), $dbName), $username, $password, array(

@@ -9,14 +9,15 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BaseCommand extends Command {
+class BaseCommand extends Command
+{
 
-    const AWS_DIR_PATH          = '/.aws';
-    const AWS_CREDENTIALS_PATH  = '/.aws/credentials';
-    const AWS_CONFIG_PATH       = '/.aws/config';
-    const APP_DIR_PATH          = '/.magedbm';
-    const APP_CONFIG_PATH       = '/.magedbm/config';
-    const TMP_PATH              = '/tmp/magedbm';
+    const AWS_DIR_PATH = '/.aws';
+    const AWS_CREDENTIALS_PATH = '/.aws/credentials';
+    const AWS_CONFIG_PATH = '/.aws/config';
+    const APP_DIR_PATH = '/.magedbm';
+    const APP_CONFIG_PATH = '/.magedbm/config';
+    const TMP_PATH = '/tmp/magedbm';
 
     /** @var InputInterface $input */
     protected $input;
@@ -38,7 +39,8 @@ class BaseCommand extends Command {
      *
      * @return $this
      */
-    public function setInput(InputInterface $input) {
+    public function setInput(InputInterface $input)
+    {
         $this->input = $input;
 
         return $this;
@@ -49,7 +51,8 @@ class BaseCommand extends Command {
      *
      * @return InputInterface
      */
-    public function getInput() {
+    public function getInput()
+    {
         return $this->input;
     }
 
@@ -60,7 +63,8 @@ class BaseCommand extends Command {
      *
      * @return $this
      */
-    public function setOutput(OutputInterface $output) {
+    public function setOutput(OutputInterface $output)
+    {
         $this->output = $output;
 
         return $this;
@@ -71,7 +75,8 @@ class BaseCommand extends Command {
      *
      * @return OutputInterface
      */
-    public function getOutput() {
+    public function getOutput()
+    {
         return $this->output;
     }
 
@@ -114,7 +119,7 @@ class BaseCommand extends Command {
             try {
                 // Upload to S3.
                 $this->s3Client = S3Client::factory(array(
-                    'region'  => $region
+                    'region' => $region
                 ));
             } catch (CredentialsException $e) {
                 $this->getOutput()->writeln('<error>AWS credentials failed</error>');
@@ -137,7 +142,7 @@ class BaseCommand extends Command {
                 $config = $iniReader->readFile($this->getAppConfigPath());
                 $this->config = $config['default'];
 
-                foreach($input->getOptions() as $option => $value) {
+                foreach ($input->getOptions() as $option => $value) {
                     if ($value) {
                         $this->config[$option] = $value;
                     }
@@ -152,10 +157,11 @@ class BaseCommand extends Command {
     }
 
     /**
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      */
-    protected function initialize(InputInterface $input, OutputInterface $output) {
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
         parent::initialize($input, $output);
 
         $this->setInput($input);
@@ -201,7 +207,8 @@ class BaseCommand extends Command {
     /**
      * Check for AWS Credentials
      */
-    protected function validateConfiguration() {
+    protected function validateConfiguration()
+    {
         if ($this instanceof ConfigureCommand) {
             return true;
         }
