@@ -4,13 +4,16 @@ Provides a simpler way for developers to retrieve sanitised Magento database bac
 
 It's design to run on production boxes to create database dumps and upload to Amazon S3 buckets. 
 
-It can then be run on local development machines to get latest or specific backup for a project and automatically import it. 
-
+It can then be run on local development machines to get latest or specific backup for a project and automatically import it.
 
 ## Motivation
 
-Working on Magento client sites typically requires a fresh copy of the production database in order reduce discrepencies later in the development cycle due to differences between environments.  This can be difficult to achieve a number of reasons and either way will slow down development process. 
+Working on Magento client sites typically requires a fresh copy of the production database in order reduce discrepencies later in the development cycle due to differences between environments.  This can be difficult to achieve a number of reasons and either way will slow down development process.
 
+## Compatibility
+
+Compatible with PHP 5.3+.
+Uses a PHP alternative for creating database backups when exec is disabled. 
 
 ## Installation
 
