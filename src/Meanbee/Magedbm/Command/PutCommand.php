@@ -87,8 +87,13 @@ class PutCommand extends BaseCommand
                 'SourceFile' => $this->getFilePath($input),
             ));
 
-            $this->getOutput()->writeln(sprintf('<info>%s database uploaded to %s.</info>',
-                $input->getArgument('name'), $result->get('ObjectURL')));
+            $this->getOutput()->writeln(
+                sprintf(
+                    '<info>%s database uploaded to %s.</info>',
+                    $input->getArgument('name'),
+                    $result->get('ObjectURL')
+                )
+            );
 
         } catch (InstanceProfileCredentialsException $e) {
             $this->cleanUp();
@@ -220,7 +225,6 @@ class PutCommand extends BaseCommand
                 throw new \Exception("magerun db:dump failed to create backup..");
             }
         } catch (\InvalidArgumentException $e) {
-
             $this->createBackupWithoutExec($input, $output);
 
             $output->writeln('<info>Finished</info>');
@@ -244,14 +248,22 @@ class PutCommand extends BaseCommand
         $dbHelper->setHelperSet($magerun->getHelperSet());
         $dbHelper->detectDbSettings(new NullOutput());
         $magerunConfig = $magerun->getConfig();
-        $stripTables = $dbHelper->resolveTables(explode(' ', '@development'),
+        $stripTables = $dbHelper->resolveTables(
+            explode(' ', '@development'),
             $dbHelper->getTableDefinitions($magerunConfig['commands']['N98\Magento\Command\Database\DumpCommand'])
         );
 
-        $output->writeln(array('',
-            $magerun->getHelperSet()->get('formatter')->formatBlock('Dump MySQL Database (without exec)',
-                'bg=blue;fg=white', true), '',
-        ));
+        $output->writeln(
+            array(
+                '',
+                $magerun->getHelperSet()->get('formatter')->formatBlock(
+                    'Dump MySQL Database (without exec)',
+                    'bg=blue;fg=white',
+                    true
+                ),
+                ''
+            )
+        );
 
         $dbSettings = $dbHelper->getDbSettings();
         $username = (string)$dbSettings['username'];
@@ -259,13 +271,13 @@ class PutCommand extends BaseCommand
         $dbName = (string)$dbSettings['dbname'];
 
         try {
-
-            $output->writeln('<comment>No-data export for: <info>' . implode(' ', $stripTables)
-                . '</info></comment>'
+            $output->writeln(
+                '<comment>No-data export for: <info>' . implode(' ', $stripTables) . '</info></comment>'
             );
 
-            $output->writeln('<comment>Start dumping database <info>' . $dbSettings['dbname']
-                . '</info> to file <info>' . $filePath . '</info>'
+            $output->writeln(
+                '<comment>Start dumping database <info>' . $dbSettings['dbname'] . '</info> to file <info>'
+                . $filePath . '</info>'
             );
 
             // Dump Structure for tables that we are not to receive data from
