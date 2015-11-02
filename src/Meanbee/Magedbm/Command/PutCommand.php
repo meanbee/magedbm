@@ -215,9 +215,10 @@ class PutCommand extends BaseCommand
             /** @var \N98\Magento\Command\Database\DumpCommand $dumpCommand */
             $dumpCommand = $magerun->find("db:dump");
 
+            $stripOptions = $input->getOption('strip') ? : '@development';
             $dumpInput = new ArrayInput(array(
                 'filename' => $filePath,
-                '--strip' => '@development',
+                '--strip' => $stripOptions,
                 '--compression' => 'gzip',
             ));
 
@@ -243,13 +244,15 @@ class PutCommand extends BaseCommand
         $magerun = $this->getMagerun();
         $filePath = $this->getFilePath($input);
 
+        $stripOptions = $input->getOption('strip') ? : '@development';
+
         // Exec must be unavailable so use PHP alternative (match output)
         $dbHelper = new DatabaseHelper();
         $dbHelper->setHelperSet($magerun->getHelperSet());
         $dbHelper->detectDbSettings(new NullOutput());
         $magerunConfig = $magerun->getConfig();
         $stripTables = $dbHelper->resolveTables(
-            explode(' ', '@development'),
+            explode(' ', $stripOptions),
             $dbHelper->getTableDefinitions($magerunConfig['commands']['N98\Magento\Command\Database\DumpCommand'])
         );
 
