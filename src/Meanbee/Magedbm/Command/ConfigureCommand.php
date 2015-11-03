@@ -54,7 +54,7 @@ class ConfigureCommand extends BaseCommand
     /**
      * Execute the command.
      *
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      *
      * @throws \Exception
@@ -73,7 +73,7 @@ class ConfigureCommand extends BaseCommand
             mkdir($this->getAwsDirPath());
         }
 
-        if(!is_writeable($this->getAwsDirPath())) {
+        if (!is_writeable($this->getAwsDirPath())) {
             $this->getOutput()->writeln('<error>Unable to write AWS credentials.  Please manually add to ~/.aws/credentials');
             exit;
         }
@@ -90,7 +90,7 @@ class ConfigureCommand extends BaseCommand
         if ($input->getOption('key') && $input->getOption('secret')) {
             $credentials = array(
                 'default' => array(
-                    'aws_access_key_id'     => $input->getOption('key'),
+                    'aws_access_key_id' => $input->getOption('key'),
                     'aws_secret_access_key' => $input->getOption('secret')
                 )
             );
@@ -136,8 +136,9 @@ class ConfigureCommand extends BaseCommand
     public function isConfigured()
     {
         if (file_exists($this->getAwsCredentialsPath()) && file_exists($this->getAwsConfigPath()) &&
-            file_exists($this->getAppConfigPath())) {
-                return true;
+            file_exists($this->getAppConfigPath())
+        ) {
+            return true;
         }
 
         return false;

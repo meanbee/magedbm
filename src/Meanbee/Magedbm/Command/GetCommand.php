@@ -63,7 +63,7 @@ class GetCommand extends BaseCommand
     /**
      * Execute the command.
      *
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      *
      * @throws \Exception
@@ -78,7 +78,8 @@ class GetCommand extends BaseCommand
                 $output,
                 '<question>Are you sure you wish to overwrite local database [y/n]?</question>',
                 false
-            )) {
+            )
+            ) {
                 return;
             }
         }
@@ -151,7 +152,7 @@ class GetCommand extends BaseCommand
         try {
             $s3->getObject(array(
                 'Bucket' => $config['bucket'],
-                'Key'    => $input->getArgument('name') . '/' . $file,
+                'Key' => $input->getArgument('name') . '/' . $file,
                 'SaveAs' => $this->getFilePath($file)
             ));
         } catch (NoSuchKeyException $e) {
@@ -183,8 +184,8 @@ class GetCommand extends BaseCommand
         }
 
         $params = array(
-            'filename'       => $this->getFilePath($file),
-            '--compression'  => 'gzip',
+            'filename' => $this->getFilePath($file),
+            '--compression' => 'gzip',
         );
 
         if ($input->getOption('drop-tables')) {

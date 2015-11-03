@@ -42,7 +42,7 @@ class ListCommand extends BaseCommand
     /**
      * Execute the command.
      *
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      *
      * @throws \Exception
@@ -61,7 +61,7 @@ class ListCommand extends BaseCommand
 
             foreach ($results as $item) {
                 $itemKeyChunks = explode('/', $item['Key']);
-                $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks) , $item['Size'] / 1024 / 1024));
+                $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks), $item['Size'] / 1024 / 1024));
             }
 
             if (!$results->count()) {
