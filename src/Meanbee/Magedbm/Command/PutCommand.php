@@ -320,6 +320,7 @@ class PutCommand extends BaseCommand
                 gzwrite($zfh, fgets($fhData, 4096));
             }
             gzclose($zfh);
+            fclose($fhData);
 
         } catch (\Exception $e) {
             throw new \Exception("Unable to export database.");
