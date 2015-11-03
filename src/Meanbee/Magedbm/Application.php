@@ -10,8 +10,8 @@ use Meanbee\Magedbm\Command\PutCommand;
 class Application extends \Symfony\Component\Console\Application
 {
 
-    const APP_NAME = "Magedbm";
-    const APP_VERSION = "1.0.0";
+    const APP_NAME = 'Magedbm';
+    const APP_VERSION = '1.0.0';
 
     protected $autoloader;
 
