@@ -87,8 +87,13 @@ class PutCommand extends BaseCommand
                 'SourceFile' => $this->getFilePath($input),
             ));
 
-            $this->getOutput()->writeln(sprintf('<info>%s database uploaded to %s.</info>',
-                $input->getArgument('name'), $result->get('ObjectURL')));
+            $this->getOutput()->writeln(
+                sprintf(
+                    '<info>%s database uploaded to %s.</info>',
+                    $input->getArgument('name'),
+                    $result->get('ObjectURL')
+                )
+            );
 
         } catch (InstanceProfileCredentialsException $e) {
             $this->cleanUp();
@@ -210,9 +215,10 @@ class PutCommand extends BaseCommand
             /** @var \N98\Magento\Command\Database\DumpCommand $dumpCommand */
             $dumpCommand = $magerun->find("db:dump");
 
+            $stripOptions = $input->getOption('strip') ? : '@development';
             $dumpInput = new ArrayInput(array(
                 'filename' => $filePath,
-                '--strip' => '@development',
+                '--strip' => $stripOptions,
                 '--compression' => 'gzip',
             ));
 
@@ -220,46 +226,104 @@ class PutCommand extends BaseCommand
                 throw new \Exception("magerun db:dump failed to create backup..");
             }
         } catch (\InvalidArgumentException $e) {
-
-            // Exec must be unavailable so use PHP alternative (match output)
-            $dbHelper = new DatabaseHelper();
-            $dbHelper->setHelperSet($magerun->getHelperSet());
-            $dbHelper->detectDbSettings(new NullOutput());
-            $magerunConfig = $magerun->getConfig();
-            $stripTables = $dbHelper->resolveTables(explode(' ', '@development'),
-                $dbHelper->getTableDefinitions($magerunConfig['commands']['N98\Magento\Command\Database\DumpCommand'])
-            );
-
-            $output->writeln(array('',
-                $magerun->getHelperSet()->get('formatter')->formatBlock('Dump MySQL Database (without exec)',
-                    'bg=blue;fg=white', true), '',
-            ));
-
-            $dbSettings = $dbHelper->getDbSettings();
-            $username = (string)$dbSettings['username'];
-            $password = (string)$dbSettings['password'];
-            $dbName = (string)$dbSettings['dbname'];
-
-            try {
-                $dump = new Mysqldump(sprintf('%s;dbname=%s', $dbHelper->dsn(), $dbName), $username, $password, array(
-                    'compress' => Mysqldump::GZIP,
-                    'exclude-tables' => $stripTables
-                ));
-
-                $output->writeln('<comment>No-data export for: <info>' . implode(' ', $stripTables)
-                    . '</info></comment>'
-                );
-
-                $output->writeln('<comment>Start dumping database <info>' . $dbSettings['dbname']
-                    . '</info> to file <info>' . $filePath . '</info>'
-                );
-
-                $dump->start($filePath);
-            } catch (\Exception $e) {
-                throw new \Exception("Unable to export database.");
-            }
+            $this->createBackupWithoutExec($input, $output);
 
             $output->writeln('<info>Finished</info>');
+        }
+    }
+
+    /**
+     * PHP alternative to dump database without exec
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @throws \Exception
+     */
+    private function createBackupWithoutExec(InputInterface $input, OutputInterface $output)
+    {
+        $magerun = $this->getMagerun();
+        $filePath = $this->getFilePath($input);
+
+        $stripOptions = $input->getOption('strip') ? : '@development';
+
+        // Exec must be unavailable so use PHP alternative (match output)
+        $dbHelper = new DatabaseHelper();
+        $dbHelper->setHelperSet($magerun->getHelperSet());
+        $dbHelper->detectDbSettings(new NullOutput());
+        $magerunConfig = $magerun->getConfig();
+        $stripTables = $dbHelper->resolveTables(
+            explode(' ', $stripOptions),
+            $dbHelper->getTableDefinitions($magerunConfig['commands']['N98\Magento\Command\Database\DumpCommand'])
+        );
+
+        $output->writeln(
+            array(
+                '',
+                $magerun->getHelperSet()->get('formatter')->formatBlock(
+                    'Dump MySQL Database (without exec)',
+                    'bg=blue;fg=white',
+                    true
+                ),
+                ''
+            )
+        );
+
+        $dbSettings = $dbHelper->getDbSettings();
+        $username = (string)$dbSettings['username'];
+        $password = (string)$dbSettings['password'];
+        $dbName = (string)$dbSettings['dbname'];
+
+        try {
+            $output->writeln(
+                '<comment>No-data export for: <info>' . implode(' ', $stripTables) . '</info></comment>'
+            );
+
+            $output->writeln(
+                '<comment>Start dumping database <info>' . $dbSettings['dbname'] . '</info> to file <info>'
+                . $filePath . '</info>'
+            );
+
+            // Dump Structure for tables that we are not to receive data from
+            $dumpStructure = new Mysqldump(
+                sprintf('%s;dbname=%s', $dbHelper->dsn(), $dbName),
+                $username,
+                $password,
+                array(
+                    'include-tables' => $stripTables,
+                    'no-data' => true,
+                )
+            );
+
+            $dumpStructure->start($filePath . '.structure');
+
+            $dump = new Mysqldump(sprintf('%s;dbname=%s', $dbHelper->dsn(), $dbName), $username, $password, array(
+                'exclude-tables' => $stripTables
+            ));
+
+            $dump->start($filePath . '.data');
+
+            // Now merge two files
+            $fhData = fopen($filePath . '.data', 'a+');
+            $fhStructure = fopen($filePath . '.structure', 'r');
+            if ($fhData && $fhStructure) {
+                while (!feof($fhStructure)) {
+                    fwrite($fhData, fgets($fhStructure, 4096));
+                }
+            }
+
+            fclose($fhStructure);
+
+            // Gzip
+            rewind($fhData);
+            $zfh = gzopen($filePath, 'wb');
+            while (!feof($fhData)) {
+                gzwrite($zfh, fgets($fhData, 4096));
+            }
+            gzclose($zfh);
+            fclose($fhData);
+
+        } catch (\Exception $e) {
+            throw new \Exception("Unable to export database.");
         }
     }
 }
