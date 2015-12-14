@@ -1,0 +1,47 @@
+{
+  "chmod": "0755",
+  "compactors": [
+    "Herrera\\Box\\Compactor\\Json",
+    "Herrera\\Box\\Compactor\\Php"
+  ],
+  "compression": "GZ",
+  "directories": [
+    "src"
+  ],
+  "files": [
+    "vendor/autoload.php",
+    "vendor/herrera-io/phar-update/res/schema.json",
+    "LICENSE.md"
+  ],
+  "finder": [
+    {
+      "name": "*.php",
+      "exclude": [
+        "Test",
+        "Tests",
+        "test",
+        "tests"
+      ],
+      "in": [
+        "vendor/"
+      ]
+    }
+  ],
+  "finder-bin": [
+    {
+      "notName": "*.php",
+      "exclude": [
+        "Test",
+        "Tests",
+        "test",
+        "tests"
+      ],
+      "in": [
+        "vendor"
+      ]
+    }
+  ],
+  "main": "bin/magedbm",
+  "output": "magedbm.phar",
+  "stub": true
+}
