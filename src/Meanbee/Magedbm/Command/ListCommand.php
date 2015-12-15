@@ -22,7 +22,7 @@ class ListCommand extends BaseCommand
             ->setDescription('List available backups')
             ->addArgument(
                 'name',
-                InputArgument::REQUIRED,
+                InputArgument::OPTIONAL,
                 'Project identifier'
             )
             ->addOption(
@@ -53,10 +53,12 @@ class ListCommand extends BaseCommand
         $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
+        $name = $input->getArgument('name') ? : '';
+
         try {
             $results = $s3->getIterator(
                 'ListObjects',
-                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
+                array('Bucket' => $config['bucket'], 'Prefix' => $name)
             );
 
             foreach ($results as $item) {
