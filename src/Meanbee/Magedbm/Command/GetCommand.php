@@ -35,6 +35,12 @@ class GetCommand extends BaseCommand
                 'File to import, otherwise latest downloaded'
             )
             ->addOption(
+                'download-only',
+                '-o',
+                InputOption::VALUE_NONE,
+                'Only download the backup to the current directory'
+            )
+            ->addOption(
                 '--force',
                 '-f',
                 InputOption::VALUE_NONE,
@@ -73,7 +79,7 @@ class GetCommand extends BaseCommand
     {
         // Import overwrites databases so ask for confirmation.
         $dialog = $this->getHelper('dialog');
-        if (!$input->getOption('force')) {
+        if (!$input->getOption('force') && !$input->getOption('download-only')) {
             if (!$dialog->askConfirmation(
                 $output,
                 '<question>Are you sure you wish to overwrite local database [y/n]?</question>',
@@ -94,7 +100,11 @@ class GetCommand extends BaseCommand
 
         $this->downloadBackup($file, $s3, $config, $input);
 
-        $this->backupImport($file, $input);
+        if ($input->getOption('download-only')) {
+            $this->backupMove($file);
+        } else {
+            $this->backupImport($file, $input);
+        }
     }
 
     /**
@@ -201,6 +211,22 @@ class GetCommand extends BaseCommand
         }
 
         $this->cleanUp();
+    }
+
+    /**
+     * Move backup from tmp directory to current working directory
+     *
+     * @param $file
+     */
+    protected function backupMove($file)
+    {
+        $filename = $this->getFilePath($file);
+        $newFilename = getcwd() . '/' . $file;
+        if (rename($filename, $newFilename)) {
+            $this->getOutput()->writeln("<info>Downloaded to $newFilename.</info>");
+        } else {
+            $this->getOutput()->writeln("<error>Failed to move backup to current working directory. Check $filename</error>");
+        }
     }
 
 
