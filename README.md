@@ -6,6 +6,8 @@ It's design to run on production boxes to create database dumps and upload to Am
 
 It can then be run on local development machines to get latest or specific backup for a project and automatically import it.
 
+Works particularly well when partnered with [mageconfigsync](https://github.com/punkstar/mageconfigsync).
+
 ## Motivation
 
 Working on Magento client sites typically requires a fresh copy of the production database in order reduce discrepencies later in the development cycle due to differences between environments.  This can be difficult to achieve a number of reasons and either way will slow down development process.
