@@ -53,7 +53,7 @@ class ListCommand extends BaseCommand
         $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
-        $name = $input->getArgument('name') ? : '';
+        $name = $input->getArgument('name') ?: '';
 
         try {
             $results = $s3->getIterator(
