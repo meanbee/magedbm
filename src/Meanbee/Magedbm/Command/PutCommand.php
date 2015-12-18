@@ -291,13 +291,15 @@ class PutCommand extends BaseCommand
                 array(
                     'include-tables' => $stripTables,
                     'no-data' => true,
+                    'add-drop-table' => true,
                 )
             );
 
             $dumpStructure->start($filePath . '.structure');
 
             $dump = new Mysqldump(sprintf('%s;dbname=%s', $dbHelper->dsn(), $dbName), $username, $password, array(
-                'exclude-tables' => $stripTables
+                'exclude-tables' => $stripTables,
+                'add-drop-table' => true,
             ));
 
             $dump->start($filePath . '.data');
