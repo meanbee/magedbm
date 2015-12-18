@@ -169,12 +169,17 @@ class BaseCommand extends Command
         $this->validateConfiguration();
     }
 
-
+    /**
+     * @return string
+     */
     protected function getAppDirPath()
     {
         return getenv('HOME') . self::APP_DIR_PATH;
     }
 
+    /**
+     * @return string
+     */
     protected function getAppConfigPath()
     {
         return getenv('HOME') . self::APP_CONFIG_PATH;
