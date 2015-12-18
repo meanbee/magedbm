@@ -122,3 +122,33 @@ Delete old backups from S3.
 ```
 magedbm rm [-r|--region="..."] [-b|--bucket="..."] name file
 ```
+
+
+## Development
+
+### Packaging Phar
+
+We use [box project](https://github.com/box-project/box2) for creating a phar. The configuration for which is found in 
+`box.json`. 
+
+To build, change to the project root and run:
+
+```
+box build
+```
+
+If you run into the following [error](https://github.com/box-project/box2/issues/80):
+
+```
+PHP Fatal error:  Uncaught exception 'ErrorException' with message 'proc_open(): unable to create pipe Too many open files'
+```
+
+
+Then increasing the limit by running this seems to be a solid workaround: 
+
+```
+ulimit -Sn 4096
+```
+
+
+
