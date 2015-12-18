@@ -50,7 +50,7 @@ class GetCommand extends BaseCommand
                 '--drop-tables',
                 '-d',
                 InputOption::VALUE_NONE,
-                'Drop tables before import'
+                'Drop tables before import.  Deprecated since 1.4.0 as all exports now drop tables automatically.'
             )
             ->addOption(
                 '--region',
@@ -197,10 +197,6 @@ class GetCommand extends BaseCommand
             'filename' => $this->getFilePath($file),
             '--compression' => 'gzip',
         );
-
-        if ($input->getOption('drop-tables')) {
-            $params['--drop-tables'] = true;
-        }
 
         try {
             if ($returnCode = $importCommand->run(new ArrayInput($params), $this->getOutput())) {
