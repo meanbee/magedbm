@@ -214,7 +214,7 @@ class GetCommand extends BaseCommand
     }
 
     /**
-     * Move backup from tmp directory to specified location
+     * Move backup from tmp directory to current working directory
      *
      * @param $file
      */
