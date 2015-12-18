@@ -154,7 +154,7 @@ ulimit -Sn 4096
 
 After creating a release according to [meanbee standards](http://standards.meanbee.com/tools.html), the phar can be attached to the release on github. 
 
-It also needs to be uploaded to the magedbm-releases bucket in Meanbee's S3 account. We upload one version as `magedbm.phar` and another with the version in it `magedbm-1.3.0.phar`.
+It also needs to be uploaded to the magedbm-releases bucket in Meanbee's S3 account. We upload one version as `magedbm.phar` and another with the version in it `magedbm.1.3.0.phar`.
 
 In order for the self-update command to know about the new release, the manifest.json file (also in the magedbm-releases bucket) requires update. Create a new entry in the releases array to point to the latest version.  To create the SHA which is used for valiation upon update run this command:
 
