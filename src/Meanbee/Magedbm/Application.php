@@ -6,12 +6,13 @@ use Meanbee\Magedbm\Command\DeleteCommand;
 use Meanbee\Magedbm\Command\GetCommand;
 use Meanbee\Magedbm\Command\ListCommand;
 use Meanbee\Magedbm\Command\PutCommand;
+use Meanbee\Magedbm\Command\SelfUpdateCommand;
 
 class Application extends \Symfony\Component\Console\Application
 {
 
     const APP_NAME = 'Magedbm';
-    const APP_VERSION = '1.0.0';
+    const APP_VERSION = '1.3.2';
 
     protected $autoloader;
 
@@ -28,6 +29,7 @@ class Application extends \Symfony\Component\Console\Application
         $this->add(new GetCommand());
         $this->add(new ListCommand());
         $this->add(new PutCommand());
+        $this->add(new SelfUpdateCommand());
     }
 
     public function getAutoloader()

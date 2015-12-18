@@ -15,7 +15,8 @@
     "n98/magerun": "1.*",
     "aws/aws-sdk-php": "2.*",
     "piwik/ini": "dev-master",
-    "ifsnop/mysqldump-php":"2.*"
+    "ifsnop/mysqldump-php":"2.*",
+    "herrera-io/phar-update": "2.*"
   },
   "require-dev": {},
   "bin": [
