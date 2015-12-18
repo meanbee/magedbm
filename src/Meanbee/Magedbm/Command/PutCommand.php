@@ -198,49 +198,15 @@ class PutCommand extends BaseCommand
     }
 
     /**
-     * Create database backup in tmp directory.
-     * Use magerun db:dump if available. Otherwise use php alternative if exec not available.
+     * Database export without using exec.
      *
      * @param InputInterface $input
      * @param OutputInterface $output
-     *
      * @throws \Exception
      */
     private function createBackup(InputInterface $input, OutputInterface $output)
     {
-        $magerun = $this->getMagerun();
-        $filePath = $this->getFilePath($input);
-
-        try {
-            /** @var \N98\Magento\Command\Database\DumpCommand $dumpCommand */
-            $dumpCommand = $magerun->find("db:dump");
-
-            $stripOptions = $input->getOption('strip') ? : '@development';
-            $dumpInput = new ArrayInput(array(
-                'filename' => $filePath,
-                '--strip' => $stripOptions,
-                '--compression' => 'gzip',
-            ));
-
-            if ($dumpCommand->run($dumpInput, $output)) {
-                throw new \Exception("magerun db:dump failed to create backup..");
-            }
-        } catch (\InvalidArgumentException $e) {
-            $this->createBackupWithoutExec($input, $output);
-
-            $output->writeln('<info>Finished</info>');
-        }
-    }
-
-    /**
-     * PHP alternative to dump database without exec
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @throws \Exception
-     */
-    private function createBackupWithoutExec(InputInterface $input, OutputInterface $output)
-    {
+        // Use Magerun for getting DB details
         $magerun = $this->getMagerun();
         $filePath = $this->getFilePath($input);
 
