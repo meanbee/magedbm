@@ -22,7 +22,7 @@ class ListCommand extends BaseCommand
             ->setDescription('List available backups')
             ->addArgument(
                 'name',
-                InputArgument::REQUIRED,
+                InputArgument::OPTIONAL,
                 'Project identifier'
             )
             ->addOption(
@@ -53,15 +53,28 @@ class ListCommand extends BaseCommand
         $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
+        $name = $input->getArgument('name') ?: '';
+
         try {
             $results = $s3->getIterator(
                 'ListObjects',
-                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
+                array('Bucket' => $config['bucket'], 'Prefix' => $name)
             );
 
+            $names = array();
             foreach ($results as $item) {
                 $itemKeyChunks = explode('/', $item['Key']);
-                $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks), $item['Size'] / 1024 / 1024));
+
+                if ($name) {
+                    // If name presented, show downloads for that name
+                    $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks), $item['Size'] / 1024 / 1024));
+                } else {
+                    // Otherwise show uniqued list of available names
+                    if (!in_array($itemKeyChunks[0], $names)) {
+                        $names[] = $itemKeyChunks[0];
+                        $this->getOutput()->writeln($itemKeyChunks[0]);
+                    }
+                }
             }
 
             if (!$results->count()) {
