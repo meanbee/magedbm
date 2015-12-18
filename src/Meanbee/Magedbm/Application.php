@@ -12,7 +12,7 @@ class Application extends \Symfony\Component\Console\Application
 {
 
     const APP_NAME = 'Magedbm';
-    const APP_VERSION = '1.3.2';
+    const APP_VERSION = '1.4.0';
 
     protected $autoloader;
 

@@ -35,6 +35,12 @@ class GetCommand extends BaseCommand
                 'File to import, otherwise latest downloaded'
             )
             ->addOption(
+                'download-only',
+                '-o',
+                InputOption::VALUE_NONE,
+                'Only download the backup to the current directory'
+            )
+            ->addOption(
                 '--force',
                 '-f',
                 InputOption::VALUE_NONE,
@@ -44,7 +50,7 @@ class GetCommand extends BaseCommand
                 '--drop-tables',
                 '-d',
                 InputOption::VALUE_NONE,
-                'Drop tables before import'
+                'Drop tables before import.  Deprecated since 1.4.0 as all exports now drop tables automatically.'
             )
             ->addOption(
                 '--region',
@@ -73,7 +79,7 @@ class GetCommand extends BaseCommand
     {
         // Import overwrites databases so ask for confirmation.
         $dialog = $this->getHelper('dialog');
-        if (!$input->getOption('force')) {
+        if (!$input->getOption('force') && !$input->getOption('download-only')) {
             if (!$dialog->askConfirmation(
                 $output,
                 '<question>Are you sure you wish to overwrite local database [y/n]?</question>',
@@ -94,7 +100,11 @@ class GetCommand extends BaseCommand
 
         $this->downloadBackup($file, $s3, $config, $input);
 
-        $this->backupImport($file, $input);
+        if ($input->getOption('download-only')) {
+            $this->backupMove($file);
+        } else {
+            $this->backupImport($file, $input);
+        }
     }
 
     /**
@@ -188,10 +198,6 @@ class GetCommand extends BaseCommand
             '--compression' => 'gzip',
         );
 
-        if ($input->getOption('drop-tables')) {
-            $params['--drop-tables'] = true;
-        }
-
         try {
             if ($returnCode = $importCommand->run(new ArrayInput($params), $this->getOutput())) {
                 $this->getOutput()->writeln('<error>magerun db:import failed to import database.</error>');
@@ -201,6 +207,22 @@ class GetCommand extends BaseCommand
         }
 
         $this->cleanUp();
+    }
+
+    /**
+     * Move backup from tmp directory to current working directory
+     *
+     * @param $file
+     */
+    protected function backupMove($file)
+    {
+        $filename = $this->getFilePath($file);
+        $newFilename = getcwd() . '/' . $file;
+        if (rename($filename, $newFilename)) {
+            $this->getOutput()->writeln("<info>Downloaded to $newFilename.</info>");
+        } else {
+            $this->getOutput()->writeln("<error>Failed to move backup to current working directory. Check $filename</error>");
+        }
     }
 
 
