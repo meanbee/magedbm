@@ -61,9 +61,20 @@ class ListCommand extends BaseCommand
                 array('Bucket' => $config['bucket'], 'Prefix' => $name)
             );
 
+            $names = array();
             foreach ($results as $item) {
                 $itemKeyChunks = explode('/', $item['Key']);
-                $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks), $item['Size'] / 1024 / 1024));
+
+                if ($name) {
+                    // If name presented, show downloads for that name
+                    $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks), $item['Size'] / 1024 / 1024));
+                } else {
+                    // Otherwise show uniqued list of available names
+                    if (!in_array($itemKeyChunks[0], $names)) {
+                        $names[] = $itemKeyChunks[0];
+                        $this->getOutput()->writeln($itemKeyChunks[0]);
+                    }
+                }
             }
 
             if (!$results->count()) {
