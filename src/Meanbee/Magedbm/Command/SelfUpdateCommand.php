@@ -29,7 +29,7 @@ class SelfUpdateCommand extends BaseCommand
                 InputArgument::OPTIONAL,
                 'Updates to version-number (i.e. 1.3.2). When omitted will update to the latest version'
             )
-            ->addOption('major', 'm', InputOption::VALUE_NONE, 'Lock to current major version')
+            ->addOption('major', 'm', InputOption::VALUE_NONE, 'Allow major upgrade')
             ->setDescription('Update the version of magedbm.');
     }
 
