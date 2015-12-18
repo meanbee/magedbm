@@ -162,5 +162,7 @@ In order for the self-update command to know about the new release, the manifest
 shasum -a 1 ./magedbm.phar
 ```
 
+For any files uploaded, make sure that they're made public by clicking on Properties so that external uses to Meanbee can access.
+
 
 
