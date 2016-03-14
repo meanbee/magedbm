@@ -123,7 +123,7 @@ class PutCommand extends BaseCommand
         try {
             $results = $s3->getIterator(
                 'ListObjects',
-                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'), 'sort_results' => true)
+                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name') . '/', 'sort_results' => true)
             );
 
             $results = iterator_to_array($results, true);
