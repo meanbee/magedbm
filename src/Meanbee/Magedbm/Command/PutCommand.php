@@ -210,7 +210,7 @@ class PutCommand extends BaseCommand
         $magerun = $this->getMagerun();
         $filePath = $this->getFilePath($input);
 
-        $stripOptions = $input->getOption('strip') ? : '@development';
+        $stripOptions = $input->getOption('strip') ?: '@development';
 
         // Exec must be unavailable so use PHP alternative (match output)
         $dbHelper = new DatabaseHelper();
@@ -258,6 +258,7 @@ class PutCommand extends BaseCommand
                     'include-tables' => $stripTables,
                     'no-data' => true,
                     'add-drop-table' => true,
+                    'skip-triggers' => true,
                 )
             );
 
@@ -266,6 +267,7 @@ class PutCommand extends BaseCommand
             $dump = new Mysqldump(sprintf('%s;dbname=%s', $dbHelper->dsn(), $dbName), $username, $password, array(
                 'exclude-tables' => $stripTables,
                 'add-drop-table' => true,
+                'skip-triggers' => true,
             ));
 
             $dump->start($filePath . '.data');
