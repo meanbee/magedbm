@@ -6,6 +6,8 @@ It's design to run on production boxes to create database dumps and upload to Am
 
 It can then be run on local development machines to get latest or specific backup for a project and automatically import it.
 
+Works particularly well when partnered with [mageconfigsync](https://github.com/punkstar/mageconfigsync).
+
 ## Motivation
 
 Working on Magento client sites typically requires a fresh copy of the production database in order reduce discrepencies later in the development cycle due to differences between environments.  This can be difficult to achieve a number of reasons and either way will slow down development process.
@@ -122,3 +124,47 @@ Delete old backups from S3.
 ```
 magedbm rm [-r|--region="..."] [-b|--bucket="..."] name file
 ```
+
+
+## Development
+
+### Packaging Phar
+
+We use [box project](https://github.com/box-project/box2) for creating a phar. The configuration for which is found in 
+`box.json`. 
+
+To build, change to the project root and run:
+
+```
+box build
+```
+
+If you run into the following [error](https://github.com/box-project/box2/issues/80):
+
+```
+PHP Fatal error:  Uncaught exception 'ErrorException' with message 'proc_open(): unable to create pipe Too many open files'
+```
+
+
+Then increasing the limit by running this seems to be a solid workaround: 
+
+```
+ulimit -Sn 4096
+```
+
+### Creating Release
+
+After creating a release according to [meanbee standards](http://standards.meanbee.com/tools.html), the phar can be attached to the release on github. 
+
+It also needs to be uploaded to the magedbm-releases bucket in Meanbee's S3 account. We upload one version as `magedbm.phar` and another with the version in it `magedbm.1.3.0.phar`.
+
+In order for the self-update command to know about the new release, the manifest.json file (also in the magedbm-releases bucket) requires update. Create a new entry in the releases array to point to the latest version.  To create the SHA which is used for valiation upon update run this command:
+
+```
+shasum -a 1 ./magedbm.phar
+```
+
+For any files uploaded, make sure that they're made public by clicking on Properties so that external uses to Meanbee can access.
+
+
+

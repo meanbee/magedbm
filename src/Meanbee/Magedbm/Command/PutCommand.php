@@ -123,7 +123,7 @@ class PutCommand extends BaseCommand
         try {
             $results = $s3->getIterator(
                 'ListObjects',
-                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'), 'sort_results' => true)
+                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name') . '/', 'sort_results' => true)
             );
 
             $results = iterator_to_array($results, true);
@@ -210,7 +210,7 @@ class PutCommand extends BaseCommand
         $magerun = $this->getMagerun();
         $filePath = $this->getFilePath($input);
 
-        $stripOptions = $input->getOption('strip') ? : '@development';
+        $stripOptions = $input->getOption('strip') ?: '@development';
 
         // Exec must be unavailable so use PHP alternative (match output)
         $dbHelper = new DatabaseHelper();
@@ -258,6 +258,7 @@ class PutCommand extends BaseCommand
                     'include-tables' => $stripTables,
                     'no-data' => true,
                     'add-drop-table' => true,
+                    'skip-triggers' => true,
                 )
             );
 
@@ -266,6 +267,7 @@ class PutCommand extends BaseCommand
             $dump = new Mysqldump(sprintf('%s;dbname=%s', $dbHelper->dsn(), $dbName), $username, $password, array(
                 'exclude-tables' => $stripTables,
                 'add-drop-table' => true,
+                'skip-triggers' => true,
             ));
 
             $dump->start($filePath . '.data');

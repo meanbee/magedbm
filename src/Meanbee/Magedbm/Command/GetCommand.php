@@ -166,7 +166,7 @@ class GetCommand extends BaseCommand
                 'SaveAs' => $this->getFilePath($file)
             ));
         } catch (NoSuchKeyException $e) {
-            $this->getOutput()->writeln('<error>File such file found in S3 bucket.</error>');
+            $this->getOutput()->writeln('<error>No such file found in S3 bucket.</error>');
             exit;
         }
 
@@ -218,8 +218,16 @@ class GetCommand extends BaseCommand
     {
         $filename = $this->getFilePath($file);
         $newFilename = getcwd() . '/' . $file;
-        if (rename($filename, $newFilename)) {
-            $this->getOutput()->writeln("<info>Downloaded to $newFilename.</info>");
+
+        if (!is_writable(getcwd())) {
+            $this->getOutput()->writeln("<info>Unable to write to current working directory. Check $filename</info>");
+            return;
+        }
+
+        $result = rename($filename, $newFilename);
+
+        if ($result && file_exists($newFilename)) {
+            $this->getOutput()->writeln("<info>Downloaded to $newFilename</info>");
         } else {
             $this->getOutput()->writeln("<error>Failed to move backup to current working directory. Check $filename</error>");
         }
