@@ -14,6 +14,15 @@ interface StorageInterface
     public function delete();
 
     /**
+     * Delete s3 backups which match regex.
+     *
+     * @param string $regex
+     *
+     * @return $this
+     */
+    public function deleteMatchingObjects($regex);
+
+    /**
      * Download the current backup.
      *
      * @throws \Exception

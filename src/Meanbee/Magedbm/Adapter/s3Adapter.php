@@ -90,4 +90,16 @@ class s3Adapter implements StorageInterface
             array('Bucket' => $this->configuration->getBucketName(), 'Prefix' => $this->configuration->getName())
         );
     }
+
+    /**
+     * Delete s3 backups which match regex.
+     *
+     * @param string $regex
+     *
+     * @return $this
+     */
+    public function deleteMatchingObjects($regex)
+    {
+        return $this->client->deleteMatchingObjects($this->configuration->getBucketName(), $this->configuration->getName(), $regex);
+    }
 }

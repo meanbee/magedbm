@@ -18,11 +18,6 @@ class s3Configuration
     /**
      * @var string
      */
-    protected $regex;
-
-    /**
-     * @var string
-     */
     protected $file;
 
     /**
@@ -40,15 +35,13 @@ class s3Configuration
      *
      * @param null|string $bucketName
      * @param null|string $name
-     * @param null|string $regex
      * @param null|string $file
      * @param null|string $tmpPath
      */
-    public function __construct($bucketName = null, $name = null, $regex = null, $file = null, $tmpPath = null)
+    public function __construct($bucketName = null, $name = null, $file = null, $tmpPath = null)
     {
         $this->bucketName = $bucketName;
         $this->name = $name;
-        $this->regex = $regex;
         $this->file = $file;
         $this->tmpPath = $tmpPath;
     }
@@ -89,26 +82,6 @@ class s3Configuration
     public function setName($name)
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getRegex()
-    {
-        return $this->regex;
-    }
-
-    /**
-     * @param string $regex
-     *
-     * @return $this
-     */
-    public function setRegex($regex)
-    {
-        $this->regex = $regex;
 
         return $this;
     }
