@@ -17,7 +17,7 @@ class s3Factory
         'bucket_name' => null,
         'name' => null,
         'file' => null,
-        'tmp_path' => null,
+        'tmp_path' => '/tmp/magedbm',
         'region' => null
     );
 
