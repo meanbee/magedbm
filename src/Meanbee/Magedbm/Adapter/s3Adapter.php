@@ -39,7 +39,7 @@ class s3Adapter implements StorageInterface
      */
     public function delete()
     {
-        $this->client->deleteMatchingObjects($this->configuration->getBucketName(), $this->configuration->getName(), $this->configuration->getRegex());
+        $this->client->delete($this->getConfig()->getBucketName(), $this->getConfig()->getName());
 
         return $this;
     }
@@ -53,9 +53,9 @@ class s3Adapter implements StorageInterface
     public function get()
     {
         $this->client->getObject(array(
-            'Bucket' => $this->configuration->getBucketName(),
-            'Key' => $this->configuration->getName() . '/' . $this->configuration->getFile(),
-            'SaveAs' => $this->configuration->getFilePath()
+            'Bucket' => $this->getConfig()->getBucketName(),
+            'Key' => $this->getConfig()->getName() . '/' . $this->getConfig()->getFile(),
+            'SaveAs' => $this->getConfig()->getFilePath()
         ));
     }
 
@@ -69,9 +69,9 @@ class s3Adapter implements StorageInterface
     public function put($filePath)
     {
         $this->client->putObject(array(
-            'Bucket' => $this->configuration->getBucketName(),
-            'Key' => $this->configuration->getName() . '/' . $this->configuration->getFileName(),
-            'SourceFile' => $this->configuration->getFilePath(),
+            'Bucket' => $this->getConfig()->getBucketName(),
+            'Key' => $this->getConfig()->getName() . '/' . $this->getConfig()->getFileName(),
+            'SourceFile' => $this->getConfig()->getFilePath(),
         ));
 
         return $this;
@@ -87,7 +87,7 @@ class s3Adapter implements StorageInterface
     {
         return $this->client->getIterator(
             'ListObjects',
-            array('Bucket' => $this->configuration->getBucketName(), 'Prefix' => $this->configuration->getName())
+            array('Bucket' => $this->getConfig()->getBucketName(), 'Prefix' => $this->getConfig()->getName())
         );
     }
 
@@ -100,6 +100,16 @@ class s3Adapter implements StorageInterface
      */
     public function deleteMatchingObjects($regex)
     {
-        return $this->client->deleteMatchingObjects($this->configuration->getBucketName(), $this->configuration->getName(), $regex);
+        return $this->client->deleteMatchingObjects($this->getConfig()->getBucketName(), $this->getConfig()->getName(), $regex);
+    }
+
+    /**
+     * Get the config.
+     *
+     * @return s3Configuration
+     */
+    public function getConfig()
+    {
+        return $this->configuration;
     }
 }
