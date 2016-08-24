@@ -3,6 +3,8 @@ namespace Meanbee\Magedbm\Command;
 
 use Aws\Common\Exception\InstanceProfileCredentialsException;
 use Aws\S3\Exception\NoSuchKeyException;
+use Meanbee\Magedbm\Api\StorageInterface;
+use Meanbee\Magedbm\Factory\s3Factory;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -90,15 +92,22 @@ class GetCommand extends BaseCommand
             }
         }
 
-        $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
         $file = $input->getOption('file');
+
+        $s3 = s3Factory::create(array(
+            'bucket_name' => $config['bucket'],
+            'file' => $file,
+            'name' => $input->getArgument('name')
+        ));
+
         if (!$file) {
-            $file = $this->getLatestFile($s3, $config, $input);
+            $file = $this->getLatestFile($s3, $input);
+            $s3->getConfig()->setFile($file);
         }
 
-        $this->downloadBackup($file, $s3, $config, $input);
+        $this->downloadBackup($s3, $file);
 
         if ($input->getOption('download-only')) {
             $this->backupMove($file);
@@ -110,19 +119,16 @@ class GetCommand extends BaseCommand
     /**
      * Get latest file for a project
      *
-     * @param \Aws\S3\S3Client $s3
-     * @param Array $config
+     * @param StorageInterface $s3
      * @param InputInterface $input
      *
      * @return mixed
      */
-    protected function getLatestFile($s3, $config, $input)
+    protected function getLatestFile(StorageInterface $s3, InputInterface $input)
     {
         try {
             // Download latest available backup
-            $results = $s3->getIterator('ListObjects',
-                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
-            );
+            $results = $s3->getAll();
 
             $newest = null;
             foreach ($results as $item) {
@@ -151,20 +157,15 @@ class GetCommand extends BaseCommand
     /**
      * Download from S3 to tmp directory
      *
-     * @param $s3
-     * @param $config
-     * @param $input
+     * @param StorageInterface $storage
+     * @param string $file
      */
-    protected function downloadBackup($file, $s3, $config, $input)
+    protected function downloadBackup(StorageInterface $storage, $file)
     {
         $this->getOutput()->writeln(sprintf('<info>Downloading database %s</info>', $file));
 
         try {
-            $s3->getObject(array(
-                'Bucket' => $config['bucket'],
-                'Key' => $input->getArgument('name') . '/' . $file,
-                'SaveAs' => $this->getFilePath($file)
-            ));
+            $storage->get();
         } catch (NoSuchKeyException $e) {
             $this->getOutput()->writeln('<error>No such file found in S3 bucket.</error>');
             exit;
