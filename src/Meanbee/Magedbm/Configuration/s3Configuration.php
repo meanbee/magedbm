@@ -138,7 +138,7 @@ class s3Configuration
             mkdir($this->getTmpPath(), 0700);
         }
 
-        return sprintf('%s/%s', $this->getTmpPath(), $this->getFile());
+        return sprintf('%s/%s', $this->getTmpPath(), $this->getFileName());
     }
 
     /**

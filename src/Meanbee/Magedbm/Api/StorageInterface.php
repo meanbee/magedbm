@@ -33,11 +33,9 @@ interface StorageInterface
     /**
      * Upload the current backup.
      *
-     * @param string $filePath
-     *
-     * @return $this
+     * @return mixed
      */
-    public function put($filePath);
+    public function put();
 
     /**
      * Get available backups.

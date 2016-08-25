@@ -62,19 +62,15 @@ class s3Adapter implements StorageInterface
     /**
      * Upload the current backup.
      *
-     * @param string $filePath
-     *
-     * @return $this
+     * @return mixed
      */
-    public function put($filePath)
+    public function put()
     {
-        $this->client->putObject(array(
+        return $this->client->putObject(array(
             'Bucket' => $this->getConfig()->getBucketName(),
             'Key' => $this->getConfig()->getName() . '/' . $this->getConfig()->getFileName(),
-            'SourceFile' => $this->getConfig()->getFilePath(),
+            'SourceFile' => $this->getConfig()->getFilePath()
         ));
-
-        return $this;
     }
 
     /**

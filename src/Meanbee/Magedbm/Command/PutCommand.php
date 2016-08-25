@@ -2,6 +2,8 @@
 namespace Meanbee\Magedbm\Command;
 
 use Aws\Common\Exception\InstanceProfileCredentialsException;
+use Meanbee\Magedbm\Api\StorageInterface;
+use Meanbee\Magedbm\Factory\s3Factory;
 use N98\Util\Console\Helper\DatabaseHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -75,17 +77,18 @@ class PutCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->createBackup($input, $output);
-
-        $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
+        $s3 = s3Factory::create(array(
+            'region' => $input->getOption('region'),
+            'bucket_name' => $config['bucket'],
+            'name' => $input->getArgument('name')
+        ));
+
+        $this->createBackup($input, $output, $s3->getConfig()->getFilePath());
+
         try {
-            $result = $s3->putObject(array(
-                'Bucket' => $config['bucket'],
-                'Key' => $input->getArgument('name') . '/' . $this->getFileName($input),
-                'SourceFile' => $this->getFilePath($input),
-            ));
+            $result = $s3->put();
 
             $this->getOutput()->writeln(
                 sprintf(
@@ -108,30 +111,26 @@ class PutCommand extends BaseCommand
         $this->cleanUp();
 
         if (!$input->getOption('no-clean')) {
-            $this->maintainDatabaseHistory($input, $output, $s3, $config);
+            $this->maintainDatabaseHistory($input, $output, $s3);
         }
     }
 
     /**
-     * @param $input
-     * @param $output
-     * @param $s3
-     * @param $config
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @param StorageInterface $storage
      */
-    protected function maintainDatabaseHistory($input, $output, $s3, $config)
+    protected function maintainDatabaseHistory(InputInterface $input, OutputInterface $output, StorageInterface $storage)
     {
         try {
-            $results = $s3->getIterator(
-                'ListObjects',
-                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name') . '/', 'sort_results' => true)
-            );
+            $results = $storage->getAll();
 
             $results = iterator_to_array($results, true);
             $historyCount = $input->getOption('history-count') ?: self::HISTORY_COUNT;
             $deleteCount = count($results) - $historyCount;
 
             for ($i = 0; $i < $deleteCount; $i++) {
-                $s3->deleteMatchingObjects($config['bucket'], $results[$i]['Key']);
+                $storage->deleteMatchingObjects($results[$i]['Key']);
             }
 
         } catch (InstanceProfileCredentialsException $e) {
@@ -172,43 +171,28 @@ class PutCommand extends BaseCommand
     }
 
     /**
-     * Get file location in tmp dir
-     * @param $input
-     *
-     * @return string
-     */
-    protected function getFilePath($input)
-    {
-        // Create tmp directory if doesn't exist
-        if (!file_exists(self::TMP_PATH) && !is_dir(self::TMP_PATH)) {
-            mkdir(self::TMP_PATH, 0700);
-        }
-
-        $filename = $this->getFileName($input);
-
-        return sprintf('%s/%s', self::TMP_PATH, $filename);
-    }
-
-    /**
      * Cleanup tmp directory
+     *
+     * @param string $filePath
      */
-    protected function cleanUp()
+    protected function cleanUp($filePath = self::TMP_PATH)
     {
-        array_map('unlink', glob(self::TMP_PATH . '/*'));
+        array_map('unlink', glob($filePath . '/*'));
     }
 
     /**
      * Database export without using exec.
      *
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
+     * @param string          $filePath
+     *
      * @throws \Exception
      */
-    private function createBackup(InputInterface $input, OutputInterface $output)
+    private function createBackup(InputInterface $input, OutputInterface $output, $filePath)
     {
         // Use Magerun for getting DB details
         $magerun = $this->getMagerun();
-        $filePath = $this->getFilePath($input);
 
         $stripOptions = $input->getOption('strip') ?: '@development';
 
