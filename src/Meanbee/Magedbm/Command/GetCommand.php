@@ -4,6 +4,7 @@ namespace Meanbee\Magedbm\Command;
 use Aws\Common\Exception\InstanceProfileCredentialsException;
 use Aws\S3\Exception\NoSuchKeyException;
 use Meanbee\Magedbm\Api\StorageInterface;
+use Meanbee\Magedbm\Factory\FrameworkFactory;
 use Meanbee\Magedbm\Factory\s3Factory;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -180,29 +181,17 @@ class GetCommand extends BaseCommand
     /**
      * Import backup from tmp directory to local database
      *
-     * @param $file
-     * @param $input
+     * @param string $file
+     * @param InputInterface $input
      *
      * @throws \Exception
      */
-    protected function backupImport($file, $input)
+    protected function backupImport($file, InputInterface $input)
     {
-        try {
-            /** @var \N98\Magento\Command\Database\ImportCommand $dump */
-            $importCommand = $this->getMagerun()->find("db:import");
-        } catch (\InvalidArgumentException $e) {
-            throw new \Exception("'magerun db:import' command not found. Missing dependencies?");
-        }
-
-        $params = array(
-            'filename' => $this->getFilePath($file),
-            '--compression' => 'gzip',
-        );
+        $framework = FrameworkFactory::create($input, $this->getOutput(), $this->getApplication()->getAutoloader());
 
         try {
-            if ($returnCode = $importCommand->run(new ArrayInput($params), $this->getOutput())) {
-                $this->getOutput()->writeln('<error>magerun db:import failed to import database.</error>');
-            }
+            $framework->importDatabase($this->getFilePath($file));
         } catch (\Exception $e) {
             $this->getOutput()->writeln($e->getMessage());
         }
