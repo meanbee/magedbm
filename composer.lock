@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5b575192ab9ceefee87e56708d44ef60",
-    "content-hash": "e1ace7304ccf9c2b4eb182d0bdb76e66",
+    "hash": "33d22ab4ac6e39556819d1d76878e740",
+    "content-hash": "44d15af2c63c0cca14c48e6d68b89ad7",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -443,6 +443,7 @@
                 "rest",
                 "web service"
             ],
+            "abandoned": "guzzlehttp/guzzle",
             "time": "2015-04-29 17:06:53"
         },
         {
@@ -817,6 +818,47 @@
                 "schema"
             ],
             "time": "2015-09-08 22:28:04"
+        },
+        {
+            "name": "meanbee/libmageconf",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/meanbee/libmageconf.git",
+                "reference": "f99bd5f3745fee48cff981105677f3f402c35829"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/meanbee/libmageconf/zipball/f99bd5f3745fee48cff981105677f3f402c35829",
+                "reference": "f99bd5f3745fee48cff981105677f3f402c35829",
+                "shasum": ""
+            },
+            "require-dev": {
+                "php-vfs/php-vfs": "^1.3",
+                "phpunit/phpunit": "^5.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Meanbee\\LibMageConf\\": "src/Meanbee/LibMageConf"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nick Jones",
+                    "email": "nick@nicksays.co.uk",
+                    "homepage": "http://www.nicksays.co.uk"
+                }
+            ],
+            "description": "Discover Magento environment and configuration information outside of an application installation.",
+            "keywords": [
+                "magento"
+            ],
+            "time": "2016-07-06 14:50:17"
         },
         {
             "name": "n98/junit-xml",

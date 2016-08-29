@@ -18,9 +18,11 @@ interface StorageInterface
      *
      * @param string $regex
      *
+     * @param string $prefix
+     *
      * @return $this
      */
-    public function deleteMatchingObjects($regex);
+    public function deleteMatchingObjects($regex = '', $prefix = '');
 
     /**
      * Download the current backup.

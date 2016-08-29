@@ -3,6 +3,7 @@ namespace Meanbee\Magedbm\Command;
 
 use Aws\Common\Exception\InstanceProfileCredentialsException;
 use Meanbee\Magedbm\Api\StorageInterface;
+use Meanbee\Magedbm\Factory\FrameworkFactory;
 use Meanbee\Magedbm\Factory\s3Factory;
 use N98\Util\Console\Helper\DatabaseHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -38,7 +39,8 @@ class PutCommand extends BaseCommand
                 '--strip',
                 '-s',
                 InputOption::VALUE_OPTIONAL,
-                'Tables to exclude from export. Default is magerun\'s @development option.'
+                'Tables to exclude from export. Default is magerun\'s @development option.',
+                '@development'
             )
             ->addOption(
                 '--no-clean',
@@ -130,7 +132,7 @@ class PutCommand extends BaseCommand
             $deleteCount = count($results) - $historyCount;
 
             for ($i = 0; $i < $deleteCount; $i++) {
-                $storage->deleteMatchingObjects($results[$i]['Key']);
+                $storage->deleteMatchingObjects('', $results[$i]['Key']);
             }
 
         } catch (InstanceProfileCredentialsException $e) {
@@ -191,93 +193,13 @@ class PutCommand extends BaseCommand
      */
     private function createBackup(InputInterface $input, OutputInterface $output, $filePath)
     {
-        // Use Magerun for getting DB details
-        $magerun = $this->getMagerun();
-
-        $stripOptions = $input->getOption('strip') ?: '@development';
-
-        // Exec must be unavailable so use PHP alternative (match output)
-        $dbHelper = new DatabaseHelper();
-        $dbHelper->setHelperSet($magerun->getHelperSet());
-        $dbHelper->detectDbSettings(new NullOutput());
-        $magerunConfig = $magerun->getConfig();
-        $stripTables = $dbHelper->resolveTables(
-            explode(' ', $stripOptions),
-            $dbHelper->getTableDefinitions($magerunConfig['commands']['N98\Magento\Command\Database\DumpCommand'])
+        $framework = FrameworkFactory::create(
+            $output,
+            $filePath,
+            $this->getApplication()->getAutoloader(),
+            $input->getOption('strip')
         );
 
-        $output->writeln(
-            array(
-                '',
-                $magerun->getHelperSet()->get('formatter')->formatBlock(
-                    'Dump MySQL Database (without exec)',
-                    'bg=blue;fg=white',
-                    true
-                ),
-                ''
-            )
-        );
-
-        $dbSettings = $dbHelper->getDbSettings();
-        $username = (string)$dbSettings['username'];
-        $password = (string)$dbSettings['password'];
-        $dbName = (string)$dbSettings['dbname'];
-
-        try {
-            $output->writeln(
-                '<comment>No-data export for: <info>' . implode(' ', $stripTables) . '</info></comment>'
-            );
-
-            $output->writeln(
-                '<comment>Start dumping database <info>' . $dbSettings['dbname'] . '</info> to file <info>'
-                . $filePath . '</info>'
-            );
-
-            // Dump Structure for tables that we are not to receive data from
-            $dumpStructure = new Mysqldump(
-                sprintf('%s;dbname=%s', $dbHelper->dsn(), $dbName),
-                $username,
-                $password,
-                array(
-                    'include-tables' => $stripTables,
-                    'no-data' => true,
-                    'add-drop-table' => true,
-                    'skip-triggers' => true,
-                )
-            );
-
-            $dumpStructure->start($filePath . '.structure');
-
-            $dump = new Mysqldump(sprintf('%s;dbname=%s', $dbHelper->dsn(), $dbName), $username, $password, array(
-                'exclude-tables' => $stripTables,
-                'add-drop-table' => true,
-                'skip-triggers' => true,
-            ));
-
-            $dump->start($filePath . '.data');
-
-            // Now merge two files
-            $fhData = fopen($filePath . '.data', 'a+');
-            $fhStructure = fopen($filePath . '.structure', 'r');
-            if ($fhData && $fhStructure) {
-                while (!feof($fhStructure)) {
-                    fwrite($fhData, fgets($fhStructure, 4096));
-                }
-            }
-
-            fclose($fhStructure);
-
-            // Gzip
-            rewind($fhData);
-            $zfh = gzopen($filePath, 'wb');
-            while (!feof($fhData)) {
-                gzwrite($zfh, fgets($fhData, 4096));
-            }
-            gzclose($zfh);
-            fclose($fhData);
-
-        } catch (\Exception $e) {
-            throw new \Exception("Unable to export database.");
-        }
+        $framework->createBackup();
     }
 }

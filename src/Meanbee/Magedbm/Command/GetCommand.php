@@ -108,12 +108,12 @@ class GetCommand extends BaseCommand
             $s3->getConfig()->setFile($file);
         }
 
-        $this->downloadBackup($s3, $file);
+        $this->downloadBackup($s3, $file, $s3->getConfig()->getFilePath());
 
         if ($input->getOption('download-only')) {
             $this->backupMove($file);
         } else {
-            $this->backupImport($file, $input);
+            $this->backupImport($s3->getConfig()->getFilePath(), $input);
         }
     }
 
@@ -159,9 +159,10 @@ class GetCommand extends BaseCommand
      * Download from S3 to tmp directory
      *
      * @param StorageInterface $storage
-     * @param string $file
+     * @param string           $file
+     * @param string           $filePath
      */
-    protected function downloadBackup(StorageInterface $storage, $file)
+    protected function downloadBackup(StorageInterface $storage, $file, $filePath)
     {
         $this->getOutput()->writeln(sprintf('<info>Downloading database %s</info>', $file));
 
@@ -172,7 +173,7 @@ class GetCommand extends BaseCommand
             exit;
         }
 
-        if (!file_exists($this->getFilePath($file))) {
+        if (!file_exists($filePath)) {
             $this->getOutput()->writeln('<error>Failed to save file to local tmp directory.</error>');
             exit;
         }
@@ -181,17 +182,21 @@ class GetCommand extends BaseCommand
     /**
      * Import backup from tmp directory to local database
      *
-     * @param string $file
+     * @param string $filePath
      * @param InputInterface $input
      *
      * @throws \Exception
      */
-    protected function backupImport($file, InputInterface $input)
+    protected function backupImport($filePath, InputInterface $input)
     {
-        $framework = FrameworkFactory::create($input, $this->getOutput(), $this->getApplication()->getAutoloader());
+        $framework = FrameworkFactory::create(
+            $this->getOutput(),
+            $filePath,
+            $this->getApplication()->getAutoloader()
+        );
 
         try {
-            $framework->importDatabase($this->getFilePath($file));
+            $framework->importDatabase($filePath);
         } catch (\Exception $e) {
             $this->getOutput()->writeln($e->getMessage());
         }

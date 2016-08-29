@@ -92,9 +92,11 @@ class s3Adapter implements StorageInterface
      *
      * @param string $regex
      *
+     * @param string $prefix
+     *
      * @return $this
      */
-    public function deleteMatchingObjects($regex)
+    public function deleteMatchingObjects($regex = '', $prefix = '')
     {
         return $this->client->deleteMatchingObjects($this->getConfig()->getBucketName(), $this->getConfig()->getName(), $regex);
     }
