@@ -66,6 +66,19 @@ class GetCommand extends BaseCommand
                 '-b',
                 InputOption::VALUE_REQUIRED,
                 'Optionally specify bucket, otherwise default configuration will be used. '
+            )
+            ->addOption(
+                '--magento-root',
+                null,
+                InputArgument::OPTIONAL,
+                'The Magento root directory, defaults to current working directory.',
+                getcwd()
+            )
+            ->addOption(
+                '--magento2',
+                '-m2',
+                InputOption::VALUE_NONE,
+                'If your environment is Magento 2, add this flag.'
             );
     }
 
@@ -191,6 +204,7 @@ class GetCommand extends BaseCommand
     {
         $framework = FrameworkFactory::create(
             $this->getOutput(),
+            $input,
             $filePath,
             $this->getApplication()->getAutoloader()
         );

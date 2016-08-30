@@ -14,6 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class MagentoAdapter implements FrameworkInterface
 {
 
+    use DbDumpTrait;
+
     const DEFAULT_COMPRESSION = 'gzip';
 
     /**
@@ -50,101 +52,6 @@ class MagentoAdapter implements FrameworkInterface
         $this->mageRun = $mageRun;
         $this->output = $output;
         $this->configuration = $configuration;
-    }
-
-    /**
-     * Database export without using exec.
-     *
-     * @throws \Exception
-     * @return $this
-     */
-    public function createBackup()
-    {
-        // Use Magerun for getting DB details
-        $magerun = $this->getMagerun();
-
-        // Exec must be unavailable so use PHP alternative (match output)
-        $dbHelper = new DatabaseHelper();
-        $dbHelper->setHelperSet($magerun->getHelperSet());
-        $dbHelper->detectDbSettings(new NullOutput());
-        $magerunConfig = $magerun->getConfig();
-        $stripTables = $dbHelper->resolveTables(
-            explode(' ', $this->getConfiguration()->getStripMode()),
-            $dbHelper->getTableDefinitions($magerunConfig['commands']['N98\Magento\Command\Database\DumpCommand'])
-        );
-
-        try {
-            $this->output->writeln(
-                '<comment>
-                No-data export for: <info>' . implode(' ', $stripTables) . '</info>
-                </comment>'
-            );
-
-            $this->output->writeln(
-                '<comment>
-                Start dumping database <info>' . $this->getConfiguration()->getDatabaseName() . '</info> to file <info>'
-                . $this->getConfiguration()->getFilePath() . '</info>
-                </comment>'
-            );
-
-            // Dump Structure for tables that we are not to receive data from
-            $dumpStructure = new Mysqldump(
-                sprintf(
-                    '%s;dbname=%s',
-                    $this->getConfiguration()->getDataSourceName(),
-                    $this->getConfiguration()->getDatabaseName()
-                ),
-                $this->getConfiguration()->getDatabaseUserName(),
-                $this->getConfiguration()->getDatabasePassword(),
-                array(
-                    'include-tables' => $stripTables,
-                    'no-data' => true,
-                    'add-drop-table' => true,
-                    'skip-triggers' => true,
-                )
-            );
-
-            $dumpStructure->start($this->getConfiguration()->getFilePath() . '.structure');
-
-            $dump = new Mysqldump(
-                sprintf(
-                    '%s;dbname=%s',
-                    $this->getConfiguration()->getDataSourceName(),
-                    $this->getConfiguration()->getDatabaseName()
-                ),
-                $this->getConfiguration()->getDatabaseUserName(),
-                $this->getConfiguration()->getDatabasePassword(),
-                array(
-                'exclude-tables' => $stripTables,
-                'add-drop-table' => true,
-                'skip-triggers' => true,
-            ));
-
-            $dump->start($this->getConfiguration()->getFilePath() . '.data');
-
-            // Now merge two files
-            $fhData = fopen($this->getConfiguration()->getFilePath() . '.data', 'a+');
-            $fhStructure = fopen($this->getConfiguration()->getFilePath() . '.structure', 'r');
-            if ($fhData && $fhStructure) {
-                while (!feof($fhStructure)) {
-                    fwrite($fhData, fgets($fhStructure, 4096));
-                }
-            }
-
-            fclose($fhStructure);
-
-            // Gzip
-            rewind($fhData);
-            $zfh = gzopen($this->getConfiguration()->getFilePath(), 'wb');
-            while (!feof($fhData)) {
-                gzwrite($zfh, fgets($fhData, 4096));
-            }
-            gzclose($zfh);
-            fclose($fhData);
-
-        } catch (\Exception $e) {
-            throw new \Exception("Unable to export database.");
-        }
     }
 
     /**
@@ -196,5 +103,26 @@ class MagentoAdapter implements FrameworkInterface
     public function getConfiguration()
     {
         return $this->configuration;
+    }
+
+    /**
+     * Get tables which should be stripped.
+     *
+     * @return array
+     */
+    protected function getStrippedTables()
+    {
+        // Use Magerun for getting DB details
+        $magerun = $this->getMagerun();
+
+        // Exec must be unavailable so use PHP alternative (match output)
+        $dbHelper = new DatabaseHelper();
+        $dbHelper->setHelperSet($magerun->getHelperSet());
+        $dbHelper->detectDbSettings(new NullOutput());
+        $magerunConfig = $magerun->getConfig();
+        return $dbHelper->resolveTables(
+            explode(' ', $this->getConfiguration()->getStripMode()),
+            $dbHelper->getTableDefinitions($magerunConfig['commands']['N98\Magento\Command\Database\DumpCommand'])
+        );
     }
 }
