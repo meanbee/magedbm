@@ -203,7 +203,9 @@ class GetCommand extends BaseCommand
                 $this->getOutput()->writeln('<error>magerun db:import failed to import database.</error>');
             }
         } catch (\Exception $e) {
+            $this->cleanUp();
             $this->getOutput()->writeln($e->getMessage());
+            exit(1);
         }
 
         $this->cleanUp();
