@@ -65,9 +65,15 @@ class ListCommand extends BaseCommand
             foreach ($results as $item) {
                 $itemKeyChunks = explode('/', $item['Key']);
 
+                // If name presented, show downloads for that name
                 if ($name) {
-                    // If name presented, show downloads for that name
-                    $this->getOutput()->writeln(sprintf('%s %dMB', array_pop($itemKeyChunks), $item['Size'] / 1024 / 1024));
+                    // Get file size in MB
+                    $fileSize = $item['Size'] / 1024 / 1024;
+
+                    // If file size is less than 1MB display 1 decimal place
+                    $fileSize = ($fileSize < 1) ? round($fileSize, 1) : round($fileSize);
+
+                    $this->getOutput()->writeln(sprintf('%s %sMB', array_pop($itemKeyChunks), $fileSize));
                 } else {
                     // Otherwise show uniqued list of available names
                     if (!in_array($itemKeyChunks[0], $names)) {
