@@ -18,7 +18,9 @@
     "ifsnop/mysqldump-php":"2.*",
     "herrera-io/phar-update": "2.*"
   },
-  "require-dev": {},
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^2.3"
+  },
   "bin": [
     "bin/magedbm"
   ],
@@ -26,5 +28,9 @@
     "psr-0": {
       "Meanbee\\Magedbm\\": "src/"
     }
+  },
+  "scripts": {
+    "check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 src",
+    "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 src"
   }
 }

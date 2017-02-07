@@ -85,7 +85,9 @@ class ListCommand extends BaseCommand
 
             if (!$results->count()) {
                 // Credentials Exception would have been thrown by now, so now we can safely check for item count.
-                $this->getOutput()->writeln(sprintf('<error>No backups found for %s</error>', $input->getArgument('name')));
+                $this->getOutput()->writeln(
+                    sprintf('<error>No backups found for %s</error>', $input->getArgument('name'))
+                );
             }
         } catch (InstanceProfileCredentialsException $e) {
             $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
@@ -93,5 +95,4 @@ class ListCommand extends BaseCommand
             $this->getOutput()->writeln('<error>' . $e->getMessage() . '</error>');
         }
     }
-
 }
