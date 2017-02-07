@@ -39,6 +39,18 @@ class PutCommand extends BaseCommand
                 'Tables to exclude from export. Default is magerun\'s @development option.'
             )
             ->addOption(
+                '--routines',
+                '-R',
+                InputOption::VALUE_NONE,
+                'Include stored procedures and functions in the export'
+            )
+            ->addOption(
+                '--triggers',
+                '-T',
+                InputOption::VALUE_NONE,
+                'Include triggers in the export'
+            )
+            ->addOption(
                 '--no-clean',
                 null,
                 InputOption::VALUE_NONE,
@@ -211,6 +223,8 @@ class PutCommand extends BaseCommand
         $filePath = $this->getFilePath($input);
 
         $stripOptions = $input->getOption('strip') ?: '@development';
+        $routines = $input->getOption('routines') ?: false;
+        $triggers = $input->getOption('triggers') ?: false;
 
         // Exec must be unavailable so use PHP alternative (match output)
         $dbHelper = new DatabaseHelper();
@@ -258,7 +272,8 @@ class PutCommand extends BaseCommand
                     'include-tables' => $stripTables,
                     'no-data' => true,
                     'add-drop-table' => true,
-                    'skip-triggers' => true,
+                    'routines' => $routines,
+                    'skip-triggers' => !$triggers,
                 )
             );
 
