@@ -2,7 +2,11 @@
   "name": "meanbee/magedbm",
   "description": "Magento database backup and import tool",
   "license": "MIT",
-  "keywords": ["magento", "database", "magedbm"],
+  "keywords": [
+    "magento",
+    "database",
+    "magedbm"
+  ],
   "homepage": "https://github.com/meanbee/magedbm",
   "authors": [
     {
@@ -20,7 +24,7 @@
     "n98/magerun": "1.*",
     "aws/aws-sdk-php": "2.*",
     "piwik/ini": "dev-master",
-    "ifsnop/mysqldump-php":"2.*",
+    "ifsnop/mysqldump-php": "2.*",
     "herrera-io/phar-update": "2.*"
   },
   "require-dev": {
@@ -36,13 +40,14 @@
   },
   "scripts": {
     "check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 src",
-    "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 src"
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.4.2-dev"
+    "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 src",
+    "extra": {
+      "branch-alias": {
+        "dev-master": "1.4.2-dev"
+      }
+    },
+    "config": {
+      "sort-packages": true
     }
-  },
-  "config": {
-    "sort-packages": true
   }
 }
