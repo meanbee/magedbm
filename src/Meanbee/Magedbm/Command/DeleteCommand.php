@@ -1,6 +1,7 @@
 <?php
 namespace Meanbee\Magedbm\Command;
 
+use Meanbee\Magedbm\Factory\s3Factory;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -54,12 +55,18 @@ class DeleteCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
         try {
+
+            $s3 = s3Factory::create(array(
+                'region' => $input->getOption('region'),
+                'bucket_name' => $config['bucket'],
+                'name' => $input->getArgument('name')
+            ));
+
             $regex = sprintf('/^%s\/%s$/', $input->getArgument('name'), $input->getArgument('file'));
-            $s3->deleteMatchingObjects($config['bucket'], $input->getArgument('name'), $regex);
+            $s3->deleteMatchingObjects($regex);
 
             $this->getOutput()->writeln(sprintf('<info>%s deleted.</info>', $input->getArgument('file')));
 

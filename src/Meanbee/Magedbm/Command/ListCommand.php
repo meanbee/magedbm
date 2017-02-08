@@ -2,6 +2,7 @@
 namespace Meanbee\Magedbm\Command;
 
 use Aws\Common\Exception\InstanceProfileCredentialsException;
+use Meanbee\Magedbm\Factory\s3Factory;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -50,16 +51,16 @@ class ListCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $s3 = $this->getS3Client($input->getOption('region'));
-        $config = $this->getConfig($input);
-
         $name = $input->getArgument('name') ?: '';
+        $config = $this->getConfig($input);
+        $s3 = s3Factory::create(array(
+            'region' => $input->getOption('region'),
+            'bucket_name' => $config['bucket'],
+            'name' => $name
+        ));
 
         try {
-            $results = $s3->getIterator(
-                'ListObjects',
-                array('Bucket' => $config['bucket'], 'Prefix' => $name)
-            );
+            $results = $s3->getAll();
 
             $names = array();
             foreach ($results as $item) {

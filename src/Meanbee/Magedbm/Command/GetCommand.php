@@ -3,6 +3,9 @@ namespace Meanbee\Magedbm\Command;
 
 use Aws\Common\Exception\InstanceProfileCredentialsException;
 use Aws\S3\Exception\NoSuchKeyException;
+use Meanbee\Magedbm\Api\StorageInterface;
+use Meanbee\Magedbm\Factory\FrameworkFactory;
+use Meanbee\Magedbm\Factory\s3Factory;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -63,6 +66,19 @@ class GetCommand extends BaseCommand
                 '-b',
                 InputOption::VALUE_REQUIRED,
                 'Optionally specify bucket, otherwise default configuration will be used. '
+            )
+            ->addOption(
+                '--magento-root',
+                null,
+                InputArgument::OPTIONAL,
+                'The Magento root directory, defaults to current working directory.',
+                getcwd()
+            )
+            ->addOption(
+                '--magento2',
+                '-m2',
+                InputOption::VALUE_NONE,
+                'If your environment is Magento 2, add this flag.'
             );
     }
 
@@ -90,39 +106,43 @@ class GetCommand extends BaseCommand
             }
         }
 
-        $s3 = $this->getS3Client($input->getOption('region'));
         $config = $this->getConfig($input);
 
         $file = $input->getOption('file');
+
+        $s3 = s3Factory::create(array(
+            'bucket_name' => $config['bucket'],
+            'file' => $file,
+            'name' => $input->getArgument('name')
+        ));
+
         if (!$file) {
-            $file = $this->getLatestFile($s3, $config, $input);
+            $file = $this->getLatestFile($s3, $input);
+            $s3->getConfig()->setFile($file);
         }
 
-        $this->downloadBackup($file, $s3, $config, $input);
+        $this->downloadBackup($s3, $file, $s3->getConfig()->getFilePath());
 
         if ($input->getOption('download-only')) {
             $this->backupMove($file);
         } else {
-            $this->backupImport($file, $input);
+            $this->backupImport($s3->getConfig()->getFilePath(), $input);
         }
     }
 
     /**
      * Get latest file for a project
      *
-     * @param \Aws\S3\S3Client $s3
-     * @param Array $config
+     * @param StorageInterface $s3
      * @param InputInterface $input
      *
      * @return mixed
      */
-    protected function getLatestFile($s3, $config, $input)
+    protected function getLatestFile(StorageInterface $s3, InputInterface $input)
     {
         try {
             // Download latest available backup
-            $results = $s3->getIterator('ListObjects',
-                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
-            );
+            $results = $s3->getAll();
 
             $newest = null;
             foreach ($results as $item) {
@@ -151,26 +171,22 @@ class GetCommand extends BaseCommand
     /**
      * Download from S3 to tmp directory
      *
-     * @param $s3
-     * @param $config
-     * @param $input
+     * @param StorageInterface $storage
+     * @param string           $file
+     * @param string           $filePath
      */
-    protected function downloadBackup($file, $s3, $config, $input)
+    protected function downloadBackup(StorageInterface $storage, $file, $filePath)
     {
         $this->getOutput()->writeln(sprintf('<info>Downloading database %s</info>', $file));
 
         try {
-            $s3->getObject(array(
-                'Bucket' => $config['bucket'],
-                'Key' => $input->getArgument('name') . '/' . $file,
-                'SaveAs' => $this->getFilePath($file)
-            ));
+            $storage->get();
         } catch (NoSuchKeyException $e) {
             $this->getOutput()->writeln('<error>No such file found in S3 bucket.</error>');
             exit;
         }
 
-        if (!file_exists($this->getFilePath($file))) {
+        if (!file_exists($filePath)) {
             $this->getOutput()->writeln('<error>Failed to save file to local tmp directory.</error>');
             exit;
         }
@@ -179,29 +195,22 @@ class GetCommand extends BaseCommand
     /**
      * Import backup from tmp directory to local database
      *
-     * @param $file
-     * @param $input
+     * @param string $filePath
+     * @param InputInterface $input
      *
      * @throws \Exception
      */
-    protected function backupImport($file, $input)
+    protected function backupImport($filePath, InputInterface $input)
     {
-        try {
-            /** @var \N98\Magento\Command\Database\ImportCommand $dump */
-            $importCommand = $this->getMagerun()->find("db:import");
-        } catch (\InvalidArgumentException $e) {
-            throw new \Exception("'magerun db:import' command not found. Missing dependencies?");
-        }
-
-        $params = array(
-            'filename' => $this->getFilePath($file),
-            '--compression' => 'gzip',
+        $framework = FrameworkFactory::create(
+            $this->getOutput(),
+            $input,
+            $filePath,
+            $this->getApplication()->getAutoloader()
         );
 
         try {
-            if ($returnCode = $importCommand->run(new ArrayInput($params), $this->getOutput())) {
-                $this->getOutput()->writeln('<error>magerun db:import failed to import database.</error>');
-            }
+            $framework->importDatabase($filePath);
         } catch (\Exception $e) {
             $this->getOutput()->writeln($e->getMessage());
         }
