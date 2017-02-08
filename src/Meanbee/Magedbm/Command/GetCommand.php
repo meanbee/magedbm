@@ -120,7 +120,8 @@ class GetCommand extends BaseCommand
     {
         try {
             // Download latest available backup
-            $results = $s3->getIterator('ListObjects',
+            $results = $s3->getIterator(
+                'ListObjects',
                 array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name'))
             );
 
@@ -135,7 +136,6 @@ class GetCommand extends BaseCommand
                 // Credentials Exception would have been thrown by now, so now we can safely check for item count.
                 throw new \Exception('No backups found for ' . $input->getArgument('name'));
             }
-
         } catch (InstanceProfileCredentialsException $e) {
             $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
             exit;
@@ -231,7 +231,9 @@ class GetCommand extends BaseCommand
         if ($result && file_exists($newFilename)) {
             $this->getOutput()->writeln("<info>Downloaded to $newFilename</info>");
         } else {
-            $this->getOutput()->writeln("<error>Failed to move backup to current working directory. Check $filename</error>");
+            $this->getOutput()->writeln(
+                "<error>Failed to move backup to current working directory. Check $filename</error>"
+            );
         }
     }
 

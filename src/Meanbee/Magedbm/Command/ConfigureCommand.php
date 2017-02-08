@@ -74,7 +74,9 @@ class ConfigureCommand extends BaseCommand
         }
 
         if (!is_writeable($this->getAwsDirPath())) {
-            $this->getOutput()->writeln('<error>Unable to write AWS credentials.  Please manually add to ~/.aws/credentials');
+            $this->getOutput()->writeln(
+                '<error>Unable to write AWS credentials.  Please manually add to ~/.aws/credentials'
+            );
             exit;
         }
 
@@ -83,7 +85,9 @@ class ConfigureCommand extends BaseCommand
         }
 
         if (!is_writeable($this->getAppDirPath())) {
-            $this->getOutput()->writeln('<error>Unable to write Magedbm config.  Please manually add to ~/.magedbm/config');
+            $this->getOutput()->writeln(
+                '<error>Unable to write Magedbm config.  Please manually add to ~/.magedbm/config'
+            );
             exit;
         }
 
@@ -110,7 +114,7 @@ class ConfigureCommand extends BaseCommand
 
             $writer->writeToFile($this->getAwsConfigPath(), $config);
             $this->getOutput()->writeln('<info>Successfully configured AWS region config.</info>');
-        } else if (!file_exists($this->getAwsConfigPath())) {
+        } elseif (!file_exists($this->getAwsConfigPath())) {
             $this->getOutput()->writeln('<error>No AWS config was found, nor provided.</error>');
         }
 

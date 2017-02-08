@@ -85,8 +85,8 @@ class SelfUpdateCommand extends BaseCommand
         $version,
         $allowMajor,
         OutputInterface $output
-    )
-    {
+    ) {
+    
         if ($manager->update($version, $allowMajor)) {
             $output->writeln('<info>Updated to latest version.</info>');
         } else {

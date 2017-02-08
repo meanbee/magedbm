@@ -62,10 +62,8 @@ class DeleteCommand extends BaseCommand
             $s3->deleteMatchingObjects($config['bucket'], $input->getArgument('name'), $regex);
 
             $this->getOutput()->writeln(sprintf('<info>%s deleted.</info>', $input->getArgument('file')));
-
         } catch (\Exception $e) {
             $this->getOutput()->writeln(sprintf('<error>Failed to delete backup. %s.</error>', $e->getMessage()));
         }
     }
-
 }
