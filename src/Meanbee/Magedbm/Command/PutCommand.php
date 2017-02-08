@@ -294,7 +294,7 @@ class PutCommand extends BaseCommand
             gzclose($zfh);
             fclose($fhData);
         } catch (\Exception $e) {
-            throw new \Exception("Unable to export database.");
+            throw new \Exception("Unable to export database.\n" . $e->getMessage());
         }
     }
 }

@@ -3,10 +3,15 @@
   "description": "Magento database backup and import tool",
   "license": "MIT",
   "keywords": ["magento", "database", "magedbm"],
+  "homepage": "https://github.com/meanbee/magedbm",
   "authors": [
     {
       "name": "Tom Robertshaw",
       "email": "tom.robertshaw@meanbee.com"
+    },
+    {
+      "name": "MageDBM Contributors",
+      "homepage": "https://github.com/meanbee/magedbm/contributors"
     }
   ],
   "minimum-stability": "dev",
@@ -32,5 +37,12 @@
   "scripts": {
     "check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 src",
     "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 src"
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.4.2-dev"
+    }
+  },
+  "config": {
+    "sort-packages": true
   }
 }
