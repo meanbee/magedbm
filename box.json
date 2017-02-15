@@ -23,7 +23,7 @@
         "tests"
       ],
       "in": [
-        "vendor/"
+        "vendor"
       ]
     }
   ],
