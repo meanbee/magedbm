@@ -43,7 +43,7 @@
     "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 src",
     "extra": {
       "branch-alias": {
-        "dev-master": "1.4.2-dev"
+        "dev-master": "1.5.1-dev"
       }
     },
     "config": {
