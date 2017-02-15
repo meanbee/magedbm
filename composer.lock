@@ -4,6 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
+    "hash": "e4f6e79851630d8db8cce539948ba010",
     "content-hash": "9046b07545fc0f933ee0aba651193c4a",
     "packages": [
         {
@@ -359,7 +360,7 @@
                 "MIT"
             ],
             "description": "implementation of xdg base directory specification for php",
-            "time": "2014-10-24T07:27:01+00:00"
+            "time": "2014-10-24 07:27:01"
         },
         {
             "name": "fzaninotto/faker",
@@ -728,7 +729,7 @@
                 "pdo",
                 "sqlite"
             ],
-            "time": "2016-09-07T06:56:07+00:00"
+            "time": "2016-09-07 06:56:07"
         },
         {
             "name": "jakub-onderka/php-console-color",
@@ -771,7 +772,7 @@
                     "homepage": "http://www.acci.cz"
                 }
             ],
-            "time": "2014-04-08T15:00:19+00:00"
+            "time": "2014-04-08 15:00:19"
         },
         {
             "name": "jakub-onderka/php-console-highlighter",
@@ -815,7 +816,7 @@
                     "homepage": "http://www.acci.cz/"
                 }
             ],
-            "time": "2015-04-20T18:58:01+00:00"
+            "time": "2015-04-20 18:58:01"
         },
         {
             "name": "justinrainbow/json-schema",
@@ -881,7 +882,7 @@
                 "json",
                 "schema"
             ],
-            "time": "2016-01-25T15:43:01+00:00"
+            "time": "2016-01-25 15:43:01"
         },
         {
             "name": "n98/junit-xml",
@@ -917,27 +918,27 @@
                 }
             ],
             "description": "JUnit XML Document generation library",
-            "time": "2013-11-23T13:11:26+00:00"
+            "time": "2013-11-23 13:11:26"
         },
         {
             "name": "n98/magerun",
-            "version": "1.97.27",
+            "version": "1.97.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netz98/n98-magerun.git",
-                "reference": "4630f97897e26e1692882cae7afbe0d08b9d2028"
+                "reference": "56ee9116448d7e061bd7c49d83c58eff9bf2da6b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netz98/n98-magerun/zipball/4630f97897e26e1692882cae7afbe0d08b9d2028",
-                "reference": "4630f97897e26e1692882cae7afbe0d08b9d2028",
+                "url": "https://api.github.com/repos/netz98/n98-magerun/zipball/56ee9116448d7e061bd7c49d83c58eff9bf2da6b",
+                "reference": "56ee9116448d7e061bd7c49d83c58eff9bf2da6b",
                 "shasum": ""
             },
             "require": {
-                "composer/composer": "^1.0.0",
+                "composer/composer": "^1.3.0",
                 "fzaninotto/faker": "~1.4",
                 "n98/junit-xml": "~1.0",
-                "php": ">=5.3.3",
+                "php": ">=5.3.9",
                 "psy/psysh": "~0.4",
                 "symfony/console": "~2.3",
                 "symfony/event-dispatcher": "~2.3",
@@ -948,9 +949,12 @@
                 "twig/twig": "~1.0"
             },
             "require-dev": {
+                "bamarni/symfony-console-autocomplete": "^1.2.0",
                 "friendsofphp/php-cs-fixer": "~1.12.0",
                 "mikey179/vfsstream": "~1.4",
-                "phpunit/phpunit": "~4.1"
+                "phing/phing": "~2.10.0",
+                "phpunit/phpunit": "~4.1",
+                "seld/phar-utils": "1.0.1"
             },
             "bin": [
                 "bin/n98-magerun"
@@ -958,8 +962,7 @@
             "type": "library",
             "autoload": {
                 "psr-0": {
-                    "N98": "src",
-                    "Composer": "src"
+                    "N98": "src"
                 },
                 "psr-4": {
                     "N98\\": "shared/src/N98"
@@ -987,7 +990,7 @@
                 "magento",
                 "magerun"
             ],
-            "time": "2016-12-11T22:15:22+00:00"
+            "time": "2017-02-10 11:54:37"
         },
         {
             "name": "nikic/php-parser",
@@ -995,12 +998,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "62877b5d14e4d2e4b213a9cdb25413b72bb6505a"
+                "reference": "0bf561dfe75ba80441c22adecc0529056671a7d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/62877b5d14e4d2e4b213a9cdb25413b72bb6505a",
-                "reference": "62877b5d14e4d2e4b213a9cdb25413b72bb6505a",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/0bf561dfe75ba80441c22adecc0529056671a7d2",
+                "reference": "0bf561dfe75ba80441c22adecc0529056671a7d2",
                 "shasum": ""
             },
             "require": {
@@ -1038,7 +1041,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2017-02-05 16:47:56"
+            "time": "2017-02-10 20:20:03"
         },
         {
             "name": "piwik/ini",
@@ -1126,12 +1129,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/bobthecow/psysh.git",
-                "reference": "0746b83cbdd8f42a4b35f93337807b2e69f6407d"
+                "reference": "a9d2a141f05321faaca40e6f2b2d2f8145becd26"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/0746b83cbdd8f42a4b35f93337807b2e69f6407d",
-                "reference": "0746b83cbdd8f42a4b35f93337807b2e69f6407d",
+                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/a9d2a141f05321faaca40e6f2b2d2f8145becd26",
+                "reference": "a9d2a141f05321faaca40e6f2b2d2f8145becd26",
                 "shasum": ""
             },
             "require": {
@@ -1191,7 +1194,7 @@
                 "interactive",
                 "shell"
             ],
-            "time": "2017-02-07 06:36:42"
+            "time": "2017-02-15 04:18:45"
         },
         {
             "name": "seld/cli-prompt",
@@ -1285,7 +1288,7 @@
                 "parser",
                 "validator"
             ],
-            "time": "2016-11-14T17:59:58+00:00"
+            "time": "2016-11-14 17:59:58"
         },
         {
             "name": "seld/phar-utils",
@@ -1337,12 +1340,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "f3c234cd8db9f7e520a91d695db7d8bb5daeb7a4"
+                "reference": "6a05474dc5dc50c9fb579e117c879274b3f24b5c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/f3c234cd8db9f7e520a91d695db7d8bb5daeb7a4",
-                "reference": "f3c234cd8db9f7e520a91d695db7d8bb5daeb7a4",
+                "url": "https://api.github.com/repos/symfony/console/zipball/6a05474dc5dc50c9fb579e117c879274b3f24b5c",
+                "reference": "6a05474dc5dc50c9fb579e117c879274b3f24b5c",
                 "shasum": ""
             },
             "require": {
@@ -1390,7 +1393,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2017-02-06 12:04:06"
+            "time": "2017-02-14 16:24:56"
         },
         {
             "name": "symfony/debug",
@@ -1785,12 +1788,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/validator.git",
-                "reference": "b04a58dc1f9941c3291f06a496a88393ee64fdf0"
+                "reference": "b29f7c18e580d5e6e72aab4d1b6b752e69b77791"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/validator/zipball/b04a58dc1f9941c3291f06a496a88393ee64fdf0",
-                "reference": "b04a58dc1f9941c3291f06a496a88393ee64fdf0",
+                "url": "https://api.github.com/repos/symfony/validator/zipball/b29f7c18e580d5e6e72aab4d1b6b752e69b77791",
+                "reference": "b29f7c18e580d5e6e72aab4d1b6b752e69b77791",
                 "shasum": ""
             },
             "require": {
@@ -1850,7 +1853,7 @@
             ],
             "description": "Symfony Validator Component",
             "homepage": "https://symfony.com",
-            "time": "2017-01-31 21:48:58"
+            "time": "2017-02-14 16:24:56"
         },
         {
             "name": "symfony/var-dumper",
@@ -1858,12 +1861,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-dumper.git",
-                "reference": "c84f28c6524cffaf7a9f5a044c86ccde3faa5a55"
+                "reference": "7f57e98e11c6d8a77c68c51ef0f9915f7df3c8b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/c84f28c6524cffaf7a9f5a044c86ccde3faa5a55",
-                "reference": "c84f28c6524cffaf7a9f5a044c86ccde3faa5a55",
+                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/7f57e98e11c6d8a77c68c51ef0f9915f7df3c8b0",
+                "reference": "7f57e98e11c6d8a77c68c51ef0f9915f7df3c8b0",
                 "shasum": ""
             },
             "require": {
@@ -1913,7 +1916,7 @@
                 "debug",
                 "dump"
             ],
-            "time": "2017-01-28 07:49:57"
+            "time": "2017-02-14 16:35:24"
         },
         {
             "name": "symfony/yaml",
@@ -2033,12 +2036,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "575ed7d6ff2bf77f2e55f76f79189d5130b77c9a"
+                "reference": "9c5f6a988ff6fb41897d8b188af3953ea90c5330"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/575ed7d6ff2bf77f2e55f76f79189d5130b77c9a",
-                "reference": "575ed7d6ff2bf77f2e55f76f79189d5130b77c9a",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/9c5f6a988ff6fb41897d8b188af3953ea90c5330",
+                "reference": "9c5f6a988ff6fb41897d8b188af3953ea90c5330",
                 "shasum": ""
             },
             "require": {
@@ -2103,7 +2106,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2017-02-05 23:38:58"
+            "time": "2017-02-14 03:28:48"
         }
     ],
     "aliases": [],
