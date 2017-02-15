@@ -147,7 +147,6 @@ class BaseCommand extends Command
                         $this->config[$option] = $value;
                     }
                 }
-
             } catch (IniReadingException $e) {
                 $this->getOutput()->writeln('<error>Unable to read config. Try running `configure` again.</error>');
             }
@@ -221,5 +220,4 @@ class BaseCommand extends Command
         $configure = new ConfigureCommand();
         return $configure->isConfigured();
     }
-
 }

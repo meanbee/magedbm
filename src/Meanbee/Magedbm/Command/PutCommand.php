@@ -39,6 +39,18 @@ class PutCommand extends BaseCommand
                 'Tables to exclude from export. Default is magerun\'s @development option.'
             )
             ->addOption(
+                '--routines',
+                '-R',
+                InputOption::VALUE_NONE,
+                'Include stored procedures and functions in the export'
+            )
+            ->addOption(
+                '--triggers',
+                '-T',
+                InputOption::VALUE_NONE,
+                'Include triggers in the export'
+            )
+            ->addOption(
                 '--no-clean',
                 null,
                 InputOption::VALUE_NONE,
@@ -94,7 +106,6 @@ class PutCommand extends BaseCommand
                     $result->get('ObjectURL')
                 )
             );
-
         } catch (InstanceProfileCredentialsException $e) {
             $this->cleanUp();
             $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
@@ -123,7 +134,11 @@ class PutCommand extends BaseCommand
         try {
             $results = $s3->getIterator(
                 'ListObjects',
-                array('Bucket' => $config['bucket'], 'Prefix' => $input->getArgument('name') . '/', 'sort_results' => true)
+                array(
+                    'Bucket' => $config['bucket'],
+                    'Prefix' => $input->getArgument('name') . '/',
+                    'sort_results' => true
+                )
             );
 
             $results = iterator_to_array($results, true);
@@ -133,7 +148,6 @@ class PutCommand extends BaseCommand
             for ($i = 0; $i < $deleteCount; $i++) {
                 $s3->deleteMatchingObjects($config['bucket'], $results[$i]['Key']);
             }
-
         } catch (InstanceProfileCredentialsException $e) {
             $this->getOutput()->writeln('<error>AWS credentials not found. Please run `configure` command.</error>');
         } catch (\Exception $e) {
@@ -211,6 +225,8 @@ class PutCommand extends BaseCommand
         $filePath = $this->getFilePath($input);
 
         $stripOptions = $input->getOption('strip') ?: '@development';
+        $routines = $input->getOption('routines') ?: false;
+        $triggers = $input->getOption('triggers') ?: false;
 
         // Exec must be unavailable so use PHP alternative (match output)
         $dbHelper = new DatabaseHelper();
@@ -258,7 +274,8 @@ class PutCommand extends BaseCommand
                     'include-tables' => $stripTables,
                     'no-data' => true,
                     'add-drop-table' => true,
-                    'skip-triggers' => true,
+                    'routines' => $routines,
+                    'skip-triggers' => !$triggers,
                 )
             );
 
@@ -291,9 +308,8 @@ class PutCommand extends BaseCommand
             }
             gzclose($zfh);
             fclose($fhData);
-
         } catch (\Exception $e) {
-            throw new \Exception("Unable to export database.");
+            throw new \Exception("Unable to export database.\n" . $e->getMessage());
         }
     }
 }
