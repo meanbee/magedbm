@@ -229,8 +229,9 @@ class PutCommand extends BaseCommand
         $triggers = $input->getOption('triggers') ?: false;
 
         // Exec must be unavailable so use PHP alternative (match output)
-        $dbHelper = new DatabaseHelper();
-        $dbHelper->setHelperSet($magerun->getHelperSet());
+        $command = $magerun->find('db:info');
+        $command->getHelperSet()->setCommand($command);
+        $dbHelper = $command->getHelper('database');
         $dbHelper->detectDbSettings(new NullOutput());
         $magerunConfig = $magerun->getConfig();
         $stripTables = $dbHelper->resolveTables(
