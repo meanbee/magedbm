@@ -1,4 +1,4 @@
-# Magedbm - Magento Database 1.x Backup Manager
+# Magedbm - Magento 1.x Database Backup Manager
 
 Looking for Magento 2.x support? Head over to [magedbm2](https://github.com/meanbee/magedbm2).
 
