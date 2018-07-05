@@ -18,7 +18,6 @@
       "homepage": "https://github.com/meanbee/magedbm/contributors"
     }
   ],
-  "minimum-stability": "dev",
   "require": {
     "php": ">=5.3.3",
     "n98/magerun": "1.*",
