@@ -1,4 +1,6 @@
-# Magedbm - Magento Database Backup Manager
+# Magedbm - Magento 1.x Database Backup Manager
+
+Looking for Magento 2.x support? Head over to [magedbm2](https://github.com/meanbee/magedbm2).
 
 Provides a simpler way for developers to retrieve sanitised Magento database backups without requiring server access.
 
