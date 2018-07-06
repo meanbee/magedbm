@@ -119,7 +119,8 @@ class BaseCommand extends Command
             try {
                 // Upload to S3.
                 $this->s3Client = S3Client::factory(array(
-                    'region' => $region
+                    'region' => $region,
+                    'signature' => 'v4'
                 ));
             } catch (CredentialsException $e) {
                 $this->getOutput()->writeln('<error>AWS credentials failed</error>');
