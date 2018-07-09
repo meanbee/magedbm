@@ -28,5 +28,11 @@
         "sha1": "2aef638abc0a518eb52a0e8c3472099fb5b75755",
         "url": "https://s3-eu-west-1.amazonaws.com/magedbm-releases/magedbm.1.5.1.phar",
         "version": "1.5.1"
+    },
+    {
+        "name": "magedbm.phar",
+        "sha1": "68b500d68c2ec2553a0ea51a34fbb54d9a7b4c5a",
+        "url": "https://s3-eu-west-1.amazonaws.com/magedbm-releases/magedbm.1.6.0.phar",
+        "version": "1.6.0"
     }
 ]
