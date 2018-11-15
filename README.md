@@ -168,5 +168,17 @@ shasum -a 1 ./magedbm.phar
 
 For any files uploaded, make sure that they're made public by clicking on Properties so that external uses to Meanbee can access.
 
+## FAQ
 
+### Why are the admin users missing from backups uploaded with magedbm?
+
+Magedbm uses [n98-magerun](https://github.com/netz98/n98-magerun/) to translate the table groups specified with `--strip` option into a list of tables to strip. As of version 1.100.0 of n98-magerun, the default `@development` table group that magedbm uses strips out all admin users.
+
+To create a backup without stripping out admin users, add
+
+```bash
+--strip="@trade @stripped @search @newsletter @emails"
+```
+
+argument when running `magedbm put`.
 
